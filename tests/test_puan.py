@@ -1,6 +1,7 @@
 import unittest
 
-from tutar.puan import CEVAPLAR, klip_puanla, model_puanla, uyum
+from tutar.puan import (CEVAPLAR, klip_puanla, model_ozeti, model_puanla,
+                        uretilemeyen_klip, uyum)
 
 
 def soru(id, tur, sutun, beklenen="evet", eyleme_bagli=False):
@@ -115,6 +116,78 @@ class ModelPuanlaTest(unittest.TestCase):
         m = model_puanla([])
         self.assertIsNone(m["yapti_yuzde"])
         self.assertEqual(m["olculemeyen_klip"], 0)
+
+
+# Üretilemeyen klip kuralı (26 Kasım 2026, videolardan sonra yazıldı).
+# Uydurma, küçük soru listesi: iki yaptı sorusu (-ya/-yb) ve karakter soruları.
+URETIM_SORULARI = [
+    soru("c1-ya", "yapti", "yapti"),
+    soru("c1-yb", "yapti", "yapti"),
+    soru("o1", "ortak", "tuttu"),
+    soru("g1", "grup", "tuttu", eyleme_bagli=True),
+    soru("s1", "ozel", "tuttu", beklenen="hayir", eyleme_bagli=True),
+    soru("b1", "bilgi", "puansiz"),
+]
+
+
+def uretilen_klip():
+    c = {s["id"]: s["beklenen"] for s in URETIM_SORULARI}
+    return klip_puanla(URETIM_SORULARI, c)
+
+
+class UretilemeyenKlipTest(unittest.TestCase):
+    def test_yaptiya_paydada_girer_paya_girmez(self):
+        m = model_puanla([uretilen_klip(), uretilemeyen_klip(URETIM_SORULARI)])
+        # 2 doğru / 4 soru
+        self.assertEqual(m["yapti_yuzde"], 50.0)
+
+    def test_birden_cok_yapti_sorusu_sayilir(self):
+        r = uretilemeyen_klip(URETIM_SORULARI)
+        self.assertEqual(r["yapti"], (0, 2))
+
+    def test_karakter_yuzdesi_degismez(self):
+        tek = model_puanla([uretilen_klip()])
+        iki = model_puanla([uretilen_klip(), uretilemeyen_klip(URETIM_SORULARI)])
+        self.assertEqual(tek["tuttu_yuzde"], iki["tuttu_yuzde"])
+        r = uretilemeyen_klip(URETIM_SORULARI)
+        self.assertEqual(r["tuttu"], (0, 0))
+
+    def test_tur_kirilimi_degismez(self):
+        tek = model_puanla([uretilen_klip()])
+        iki = model_puanla([uretilen_klip(), uretilemeyen_klip(URETIM_SORULARI)])
+        self.assertEqual(tek["tur_yuzde"], iki["tur_yuzde"])
+        self.assertEqual(uretilemeyen_klip(URETIM_SORULARI)["tur"],
+                         {"ortak": (0, 0), "grup": (0, 0), "ozel": (0, 0)})
+
+    def test_uretti_ve_toplam_klip(self):
+        o = model_ozeti([uretilen_klip(), uretilemeyen_klip(URETIM_SORULARI),
+                         uretilen_klip()])
+        self.assertEqual(o["uretti"], 2)
+        self.assertEqual(o["toplam_klip"], 3)
+
+    def test_hepsi_uretilemeyen_model(self):
+        o = model_ozeti([uretilemeyen_klip(URETIM_SORULARI)] * 2)
+        self.assertIsNone(o["tuttu_yuzde"])
+        self.assertEqual(o["yapti_yuzde"], 0.0)
+        self.assertEqual(o["uretti"], 0)
+        self.assertEqual(o["toplam_klip"], 2)
+
+    def test_uretilemeyen_olculemeyen_sayacina_girmez(self):
+        # yaptı sorusu olmayan listede bile sayaç şişmez
+        yalniz_karakter = [soru("o1", "ortak", "tuttu")]
+        for sorular in (URETIM_SORULARI, yalniz_karakter):
+            m = model_puanla([uretilemeyen_klip(sorular)])
+            self.assertEqual(m["olculemeyen_klip"], 0)
+
+    def test_puansiz_yok_sayilir(self):
+        r = uretilemeyen_klip(URETIM_SORULARI + [soru("b2", "bilgi", "puansiz")])
+        self.assertEqual(r["yapti"], (0, 2))
+        self.assertEqual(r["disarida"], {"gorunmuyor": 0, "hakem_yok": 0, "gecersiz": 0})
+
+    def test_model_puanla_anahtarlari_ayni(self):
+        m = model_puanla([uretilen_klip()])
+        self.assertEqual(set(m), {"yapti_yuzde", "tuttu_yuzde", "tur_yuzde",
+                                  "olculemeyen_klip", "disarida"})
 
 
 class UyumTest(unittest.TestCase):

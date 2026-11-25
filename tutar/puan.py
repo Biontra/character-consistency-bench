@@ -57,6 +57,23 @@ def klip_puanla(sorular, cevaplar):
     }
 
 
+def uretilemeyen_klip(sorular):
+    """Üretilemeyen (reddedilen ya da üretim hatası alan) klibin sonucu.
+
+    "yapti" sütunundaki puanlı sorular yanlış sayılır: paydaya girer, paya girmez.
+    Karakter soruları ve tür kırılımı hiç sayılmaz. "puansiz" sorular yok sayılır.
+    Çıktı klip_puanla ile aynı yapıdadır, ek olarak "uretilemedi": True taşır.
+    """
+    yapti_sayisi = sum(1 for s in sorular if s["sutun"] == "yapti")
+    return {
+        "yapti": (0, yapti_sayisi),
+        "tuttu": (0, 0),
+        "tur": {k: (0, 0) for k in TURLER},
+        "disarida": {"gorunmuyor": 0, "hakem_yok": 0, "gecersiz": 0},
+        "uretilemedi": True,
+    }
+
+
 def _yuzde(dogru, sayilan):
     return None if sayilan == 0 else dogru / sayilan * 100
 
@@ -76,6 +93,8 @@ def model_puanla(klipler):
             tur[ad][1] += k["tur"][ad][1]
         for ad in disarida:
             disarida[ad] += k["disarida"][ad]
+        if k.get("uretilemedi"):
+            continue  # üretilemeyen klip ayrı sayılır, "ölçülemeyen" değildir
         if k["yapti"][1] + k["tuttu"][1] == 0:
             olculemeyen += 1
     return {
@@ -85,6 +104,14 @@ def model_puanla(klipler):
         "olculemeyen_klip": olculemeyen,
         "disarida": disarida,
     }
+
+
+def model_ozeti(klipler):
+    """model_puanla çıktısına üretilen ve toplam klip sayısını ekler."""
+    ozet = model_puanla(klipler)
+    ozet["uretti"] = sum(1 for k in klipler if not k.get("uretilemedi"))
+    ozet["toplam_klip"] = len(klipler)
+    return ozet
 
 
 def uyum(insan, hakem):
