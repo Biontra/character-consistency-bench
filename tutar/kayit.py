@@ -53,6 +53,7 @@ def satir_dogrula(satir: dict) -> None:
 def kayitlari_oku(klasor: Path) -> list:
     sonuc = []
     gorulen = set()
+    isler = {}
     for dosya in sorted(Path(klasor).glob("*.jsonl")):
         for no, ham in enumerate(dosya.read_text(encoding="utf-8").splitlines(), 1):
             if not ham.strip():
@@ -66,6 +67,13 @@ def kayitlari_oku(klasor: Path) -> list:
             if anahtar in gorulen:
                 raise ValueError(f"{dosya.name}:{no}: yinelenen deneme {anahtar}")
             gorulen.add(anahtar)
+            is_id = satir["is_kimligi"]
+            if is_id:
+                if is_id in isler:
+                    raise ValueError(
+                        f"{dosya.name}:{no}: is_kimligi tekrar: {is_id} "
+                        f"(ilk: {isler[is_id]})")
+                isler[is_id] = f"{dosya.name}:{no}"
             sonuc.append(satir)
     return sonuc
 

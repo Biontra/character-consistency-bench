@@ -130,12 +130,58 @@ class KayitTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as t:
             d = Path(t)
             b = gecerli(); b["komut"] = 2; b["dosya"] = "clips/m1/cmd02.mp4"
+            b["is_kimligi"] = "j2"
             b.update(durum="reddedildi", hata="x", sha256=None, sure_sn=None,
                      genislik=None, yukseklik=None)
             self._yaz(d, "m1.jsonl", [gecerli(), b])
             k = kayit.kayitlari_oku(d)
             self.assertEqual(len(k), 2)
             self.assertEqual(kayit.ozet(k), {"m1": {"tamam": 1, "reddedildi": 1}})
+
+    def test_ayni_is_kimligi_iki_dosyada_hata(self):
+        with tempfile.TemporaryDirectory() as t:
+            d = Path(t)
+            a = gecerli(); a["is_kimligi"] = "ayni"
+            b = gecerli(); b.update(model="m2", dosya="clips/m2/cmd01.mp4",
+                                    is_kimligi="ayni")
+            self._yaz(d, "m1.jsonl", [a])
+            self._yaz(d, "m2.jsonl", [b])
+            with self.assertRaises(ValueError):
+                kayit.kayitlari_oku(d)
+
+    def test_ayni_is_kimligi_ayni_dosyada_hata(self):
+        with tempfile.TemporaryDirectory() as t:
+            d = Path(t)
+            a = gecerli(); a["is_kimligi"] = "ayni"
+            b = gecerli(); b.update(komut=2, dosya="clips/m1/cmd02.mp4",
+                                    is_kimligi="ayni")
+            self._yaz(d, "m1.jsonl", [a, b])
+            with self.assertRaises(ValueError):
+                kayit.kayitlari_oku(d)
+
+    def test_bos_is_kimligi_tekrari_sorun_degil(self):
+        with tempfile.TemporaryDirectory() as t:
+            d = Path(t)
+            a = gecerli(); a["is_kimligi"] = None
+            b = gecerli(); b.update(komut=2, dosya="clips/m1/cmd02.mp4",
+                                    is_kimligi=None)
+            self._yaz(d, "m1.jsonl", [a, b])
+            self.assertEqual(len(kayit.kayitlari_oku(d)), 2)
+
+    def test_farkli_is_kimligi_gecerli(self):
+        with tempfile.TemporaryDirectory() as t:
+            d = Path(t)
+            a = gecerli(); a["is_kimligi"] = "j1"
+            b = gecerli(); b.update(komut=2, dosya="clips/m1/cmd02.mp4",
+                                    is_kimligi="j2")
+            self._yaz(d, "m1.jsonl", [a, b])
+            self.assertEqual(len(kayit.kayitlari_oku(d)), 2)
+
+    def test_gercek_kayit_is_kimlikleri_tekil(self):
+        k = kayit.kayitlari_oku(KOK / "uretim_kaydi")
+        idler = [r["is_kimligi"] for r in k if r["is_kimligi"]]
+        self.assertEqual(len(idler), len(set(idler)))
+        self.assertEqual(len(k), 100)
 
     def test_gercek_kayit(self):
         k = kayit.kayitlari_oku(KOK / "uretim_kaydi")

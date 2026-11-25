@@ -11,8 +11,18 @@ def _cevap_kontrol(kimlik, cevap):
         raise ValueError(f"bilinmeyen cevap {cevap!r} (soru {kimlik})")
 
 
+SORU_SUTUNLARI = SUTUNLAR + ("puansiz",)
+
+
+def _sutun_kontrol(sorular):
+    for s in sorular:
+        if s["sutun"] not in SORU_SUTUNLARI:
+            raise ValueError(f"bilinmeyen sutun {s['sutun']!r} (soru {s['id']})")
+
+
 def klip_puanla(sorular, cevaplar):
     """Tek klibin cevaplarını puanlar. Eksik soru ya da bilinmeyen değer ValueError."""
+    _sutun_kontrol(sorular)
     for s in sorular:
         if s["id"] not in cevaplar:
             raise ValueError(f"eksik cevap: {s['id']}")
@@ -64,6 +74,7 @@ def uretilemeyen_klip(sorular):
     Karakter soruları ve tür kırılımı hiç sayılmaz. "puansiz" sorular yok sayılır.
     Çıktı klip_puanla ile aynı yapıdadır, ek olarak "uretilemedi": True taşır.
     """
+    _sutun_kontrol(sorular)
     yapti_sayisi = sum(1 for s in sorular if s["sutun"] == "yapti")
     return {
         "yapti": (0, yapti_sayisi),

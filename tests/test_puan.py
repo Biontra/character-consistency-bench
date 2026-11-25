@@ -190,6 +190,19 @@ class UretilemeyenKlipTest(unittest.TestCase):
                                   "olculemeyen_klip", "disarida"})
 
 
+class UretilemeyenKlipDenetimTest(unittest.TestCase):
+    def test_bilinmeyen_sutun_hata(self):
+        sorular = URETIM_SORULARI + [soru("x1", "ortak", "bilinmeyen")]
+        with self.assertRaises(ValueError):
+            uretilemeyen_klip(sorular)
+
+    def test_klip_puanla_da_bilinmeyen_sutunda_valueerror(self):
+        sorular = SORULAR + [soru("x1", "ortak", "bilinmeyen")]
+        c = {s["id"]: s["beklenen"] for s in sorular}
+        with self.assertRaises(ValueError):
+            klip_puanla(sorular, c)
+
+
 class UyumTest(unittest.TestCase):
     def test_17_of_20(self):
         insan = {f"q{i}": "evet" for i in range(20)}
