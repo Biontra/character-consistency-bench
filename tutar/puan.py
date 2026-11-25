@@ -125,6 +125,31 @@ def model_ozeti(klipler):
     return ozet
 
 
+def ortak_komutlar(uretilen):
+    """Bütün modellerin ürettiği komut numaraları (sıralı liste).
+
+    Girdi {model_adi: komut numaraları}. Boş girdi ya da ortak komut yoksa [].
+    """
+    kumeler = [set(v) for v in uretilen.values()]
+    if not kumeler:
+        return []
+    return sorted(set.intersection(*kumeler))
+
+
+def ortak_tuttu(klipler_komutla, ortak):
+    """Bir modelin "karakteri tuttu" puanı, yalnız ortak komutların kliplerinden.
+
+    Girdi (komut_no, klip_sonucu) çiftleri ve ortak komut listesi. Havuzlama
+    model_puanla ile yapılır, kurallar aynıdır. Payda 0 ise yüzde None.
+    """
+    secili = set(ortak)
+    klipler = [k for no, k in klipler_komutla if no in secili]
+    ozet = model_puanla(klipler)
+    pay = sum(k["tuttu"][0] for k in klipler)
+    payda = sum(k["tuttu"][1] for k in klipler)
+    return {"tuttu_yuzde": ozet["tuttu_yuzde"], "pay": pay, "payda": payda}
+
+
 def uyum(insan, hakem):
     """Aynı anahtarlarda birebir aynı cevap oranı. Dört değer de cevap sayılır."""
     if set(insan) != set(hakem):
