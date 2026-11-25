@@ -56,3 +56,34 @@ Yalnız `evet` ve `hayir` puana girer.
 - [x] `tutar-kurallar-v1` etiketi konuldu
 
 Dondurma tarihi: 25 Kasım 2026. Bu tarihte hiçbir video üretilmemişti.
+
+## Üretim kaydı (ek, 25 Kasım 2026)
+
+Bu bölüm dondurmadan SONRA yazıldı. Puan kurallarını, soruları, eşikleri ve yukarıdaki dondurulmuş metinleri değiştirmez. Yalnız üretimin nasıl kaydedileceğini anlatır.
+
+### Kayıt düzeni
+
+- Her model için bir dosya: `uretim_kaydi/<model_id>.jsonl`. Beş ajan aynı dosyaya yazmasın diye model başına ayrıdır.
+- Her satır bir (model, komut) denemesidir. Aynı (model, komut) iki kez geçemez (tek deneme kuralı).
+- Satır, klip üretildikten hemen sonra eklenir.
+- Her alan her satırda bulunur. Bilinmeyen değer `null` yazılır.
+- Doğrulama: `tutar/kayit.py`.
+
+Alanlar, sırasıyla:
+
+`model`, `komut` (1..20), `prompt`, `durum` (`tamam`, `uretim_hatasi`, `reddedildi`), `hata`, `is_kimligi`, `tarih_saat_utc`, `gonderilen_parametreler`, `baslangic_resmi_sha256`, `baslangic_medya_kimligi`, `dosya`, `sha256`, `sure_sn`, `kare_sayisi`, `genislik`, `yukseklik`, `fps`, `ses_var`, `kredi_teklif`, `kredi_kesinti`, `cozunurluk_parametresi`, `prompt_zenginlestirme` (`kapatildi`, `secenek_yok`, `kapatilamadi`), `sunucu_prompt`, `tohum`, `model_surumu`.
+
+### Klip kökü
+
+Klipler repo dışında durur (`/Volumes/Kye/character-consistency-bench`). `dosya` alanı bu köke göre göreli yazılır: `clips/<model_id>/cmdNN.mp4`, NN iki haneli. Mutlak yol yazılmaz.
+
+### İlk klipten öğrenilenler (kling3_0, komut 1)
+
+- Modelde çözünürlük parametresi ve prompt zenginleştirme parametresi yok. Bu yüzden `cozunurluk_parametresi` null, `prompt_zenginlestirme` `secenek_yok`.
+- Çıktı 720x1280 geldi.
+- Süre 5.04 sn (121 kare, 24 fps), yani 5 sn'den bir kare fazla. Kabul edilen süre aralığı 4.9-5.2 sn.
+- Servisin prompt'u arka tarafta değiştirip değiştirmediği dışarıdan görülemiyor. Bu bir sınırdır. Servis prompt geri bildirirse `sunucu_prompt` alanına yazılır.
+
+### Üretim hatası
+
+Üretim hatası alan klip yeniden denenmez. Kayda `uretim_hatasi` (iş reddedilmişse `reddedildi`) yazılır ve sıradaki komuta geçilir.
