@@ -92,7 +92,7 @@ Klipler repo dışında durur (`/Volumes/Kye/character-consistency-bench`). `dos
 
 Bu bölüm videolar üretildikten sonra yazıldı. Donmuş kuralları değiştirmez; yalnız üretimde görülenleri kaydeder.
 
-- **Sonuç.** 100 işten 98 klip çıktı. Gemini Omni komut 2 ve 7'yi güvenlik filtresiyle reddetti. Bu iki iş yeniden denenmedi, kredi iade edildi.
+- **Sonuç.** 100 işten 98 klip çıktı. Gemini Omni komut 2 ve 7'yi güvenlik filtresiyle reddetti. Bu iki iş yeniden denenmedi, kredi iade edildi. Bu klipler nasıl puanlanır: aşağıdaki "Üretilemeyen klip kuralı" bölümüne bakın.
 - **Ses.** Grok ve Gemini Omni'de sesi kapatma seçeneği yok. İkisi sesle üretti, ses sonradan ffmpeg ile silindi. Görüntü akışı yeniden kodlanmadı; md5 ile aynı olduğu ölçüldü. Ham dosyalar saklanıyor. Konuşma komutlarında (1, 2, 3) bu iki model sesle birlikte üretmenin yararını görmüş olabilir.
 - **Wan.** `enable_thinking` kapatıldı. Diğer modellerde böyle bir ayar yok.
 - **Kare hızı ve kare sayısı.** Modele göre değişiyor. Wan 30 fps, 150 kare. Kling, Seedance ve Grok 24 fps, 121 kare. Gemini Omni 24 fps, 120 kare. Hakeme giden kare sayısı eşit: klip başına 50 (saniyede 10).
@@ -101,3 +101,16 @@ Bu bölüm videolar üretildikten sonra yazıldı. Donmuş kuralları değiştir
 - **Tek araç.** Her şey tek aracıdan (Higgsfield) geçti. Aracının komutu sunucu tarafında yeniden yazıp yazmadığı doğrulanamadı. Tohum ve model sürümü hiçbir yanıtta dönmedi.
 - **Seedance ilk karesi.** İlk kare başlangıç resmiyle piksel olarak aynı değil. Ölçüm (gri, 720x1280, ilk kare ile resim arasında ortalama mutlak fark): Kling, Wan ve Grok yaklaşık 1.4-1.6; Gemini Omni yaklaşık 3.9-4.1; Seedance yaklaşık 8.5-10 (20 klipte 8.6-13.7). Fark kayma, ölçek, renk ya da bulanıklıktan gelmiyor; kare 0'dan itibaren var ve yüz, saç, giysi bölgesinde yoğun. Kompozisyon ve karakter tasarımı aynı, ince çizgiler yeniden çizilmiş. Resim beş modele de aynı rolle (`start_image`) ve aynı medya kimliğiyle gitti. Sebebin modelin kendisi mi aracı mı olduğu ayırt edilemedi. Sonuç: Seedance'in "karakteri tuttu" puanı bu notla okunmalı. Yeniden üretim yapılmadı.
 - **Eşzamanlılık.** Eşzamanlılık sınırı yüzünden bazı gönderimler iş oluşmadan reddedildi ve yeniden gönderildi (iş oluşmadı, kredi kesilmedi). Oluşmuş hiçbir iş yeniden denenmedi: 100 ayrı iş kimliği.
+
+## Üretilemeyen klip kuralı (26 Kasım 2026, videolardan sonra yazıldı)
+
+Bu kural donmuş kurallarda yoktu; videolar üretildikten SONRA eklendi. Donmuş metinleri değiştirmez, yalnız üretilemeyen klibin nasıl puanlanacağını söyler. Etkilediği klipler: `gemini_omni_flash_1_2`, komut 2 ve 7 (güvenlik filtresi reddetti, klip yok). Kural, durumu `reddedildi` ya da `uretim_hatasi` olan her üretilemeyen klip için aynıdır; şu an `uretim_hatasi` olan satır yok.
+
+Neden: model reddettiği için ne ödül ne haksız ceza alsın.
+
+1. Sonuç tablosuna model başına "üretti: N/20" sütunu eklenir.
+2. "Komutu yaptı" puanında üretilemeyen komut yapmadı sayılır: o komutun "yaptı mı" soruları (sütun `yapti`) paydaya girer, paya girmez.
+3. "Karakteri tuttu" puanına üretilemeyen komut hiç girmez (ne paya ne paydaya), çünkü ortada bozulmuş bir karakter yok. Soru türü kırılımlarına (ortak, grup, özel) da girmez.
+4. Bu kural videolar üretildikten sonra yazıldı. Gemini Omni'nin "komutu yaptı" puanı bu notla okunmalı.
+
+Kod: `tutar/puan.py` içinde `uretilemeyen_klip` ve `model_ozeti`.
