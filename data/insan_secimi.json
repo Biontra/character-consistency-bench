@@ -1,0 +1,85 @@
+{
+  "tohum": 20261125,
+  "secim": [
+    {
+      "model": "kling3_0",
+      "komut": 10
+    },
+    {
+      "model": "kling3_0",
+      "komut": 6
+    },
+    {
+      "model": "kling3_0",
+      "komut": 4
+    },
+    {
+      "model": "kling3_0",
+      "komut": 13
+    },
+    {
+      "model": "wan3_0",
+      "komut": 18
+    },
+    {
+      "model": "wan3_0",
+      "komut": 20
+    },
+    {
+      "model": "wan3_0",
+      "komut": 14
+    },
+    {
+      "model": "wan3_0",
+      "komut": 12
+    },
+    {
+      "model": "seedance_2_0_mini",
+      "komut": 5
+    },
+    {
+      "model": "seedance_2_0_mini",
+      "komut": 16
+    },
+    {
+      "model": "seedance_2_0_mini",
+      "komut": 17
+    },
+    {
+      "model": "seedance_2_0_mini",
+      "komut": 19
+    },
+    {
+      "model": "grok_video_v15_lite",
+      "komut": 3
+    },
+    {
+      "model": "grok_video_v15_lite",
+      "komut": 7
+    },
+    {
+      "model": "grok_video_v15_lite",
+      "komut": 9
+    },
+    {
+      "model": "grok_video_v15_lite",
+      "komut": 2
+    },
+    {
+      "model": "gemini_omni_flash_1_2",
+      "komut": 8
+    },
+    {
+      "model": "gemini_omni_flash_1_2",
+      "komut": 15
+    },
+    {
+      "model": "gemini_omni_flash_1_2",
+      "komut": 11
+    },
+    {
+      "model": "gemini_omni_flash_1_2",
+      "komut": 1
+    }
+  ]
+}
