@@ -1,0 +1,48 @@
+{
+  "ortak_ayar": {
+    "sure_sn": 5,
+    "cozunurluk": "720p",
+    "oran": "9:16",
+    "ses": false,
+    "deneme": 1
+  },
+  "modeller": [
+    {
+      "id": "kling3_0",
+      "ad": "Kling 3.0",
+      "ayar": {
+        "mode": "std",
+        "sound": "off"
+      },
+      "kredi_teklif": 7.5
+    },
+    {
+      "id": "wan3_0",
+      "ad": "Wan 3.0",
+      "ayar": {
+        "generate_audio": false
+      },
+      "kredi_teklif": 7.5
+    },
+    {
+      "id": "seedance_2_0_mini",
+      "ad": "Seedance 2.0 Mini",
+      "ayar": {},
+      "kredi_teklif": 5
+    },
+    {
+      "id": "grok_video_v15_lite",
+      "ad": "Grok Video 1.5 Lite",
+      "ayar": {},
+      "kredi_teklif": 5
+    },
+    {
+      "id": "gemini_omni_flash_1_2",
+      "ad": "Gemini Omni Flash 1.2",
+      "ayar": {
+        "mode": "image-to-video"
+      },
+      "kredi_teklif": 11.25
+    }
+  ]
+}
