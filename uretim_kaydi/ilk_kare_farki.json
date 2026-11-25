@@ -1,0 +1,522 @@
+{
+ "aciklama": "Ilk kare ile baslangic resmi arasinda gri, 720x1280, piksel basina ortalama mutlak fark (0-255). Betik: scripts/ilk_kare_farki.py",
+ "ozet": {
+  "gemini_omni_flash_1_2": {
+   "en_kucuk": 3.461,
+   "ortanca": 3.757,
+   "en_buyuk": 4.047
+  },
+  "grok_video_v15_lite": {
+   "en_kucuk": 1.438,
+   "ortanca": 1.4475,
+   "en_buyuk": 1.47
+  },
+  "kling3_0": {
+   "en_kucuk": 1.428,
+   "ortanca": 1.456,
+   "en_buyuk": 1.482
+  },
+  "seedance_2_0_mini": {
+   "en_kucuk": 8.539,
+   "ortanca": 11.1745,
+   "en_buyuk": 13.576
+  },
+  "wan3_0": {
+   "en_kucuk": 1.496,
+   "ortanca": 1.498,
+   "en_buyuk": 1.502
+  }
+ },
+ "klipler": [
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 1,
+   "fark": 3.904
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 3,
+   "fark": 3.724
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 4,
+   "fark": 3.838
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 5,
+   "fark": 3.461
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 6,
+   "fark": 3.593
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 8,
+   "fark": 3.77
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 9,
+   "fark": 3.884
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 10,
+   "fark": 4.047
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 11,
+   "fark": 3.619
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 12,
+   "fark": 3.744
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 13,
+   "fark": 3.786
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 14,
+   "fark": 3.826
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 15,
+   "fark": 3.928
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 16,
+   "fark": 3.55
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 17,
+   "fark": 3.678
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 18,
+   "fark": 3.796
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 19,
+   "fark": 3.697
+  },
+  {
+   "model": "gemini_omni_flash_1_2",
+   "komut": 20,
+   "fark": 3.734
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 1,
+   "fark": 1.453
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 2,
+   "fark": 1.444
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 3,
+   "fark": 1.452
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 4,
+   "fark": 1.449
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 5,
+   "fark": 1.455
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 6,
+   "fark": 1.448
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 7,
+   "fark": 1.469
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 8,
+   "fark": 1.445
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 9,
+   "fark": 1.465
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 10,
+   "fark": 1.444
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 11,
+   "fark": 1.438
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 12,
+   "fark": 1.447
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 13,
+   "fark": 1.438
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 14,
+   "fark": 1.47
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 15,
+   "fark": 1.447
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 16,
+   "fark": 1.452
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 17,
+   "fark": 1.447
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 18,
+   "fark": 1.461
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 19,
+   "fark": 1.446
+  },
+  {
+   "model": "grok_video_v15_lite",
+   "komut": 20,
+   "fark": 1.447
+  },
+  {
+   "model": "kling3_0",
+   "komut": 1,
+   "fark": 1.455
+  },
+  {
+   "model": "kling3_0",
+   "komut": 2,
+   "fark": 1.456
+  },
+  {
+   "model": "kling3_0",
+   "komut": 3,
+   "fark": 1.428
+  },
+  {
+   "model": "kling3_0",
+   "komut": 4,
+   "fark": 1.461
+  },
+  {
+   "model": "kling3_0",
+   "komut": 5,
+   "fark": 1.451
+  },
+  {
+   "model": "kling3_0",
+   "komut": 6,
+   "fark": 1.477
+  },
+  {
+   "model": "kling3_0",
+   "komut": 7,
+   "fark": 1.467
+  },
+  {
+   "model": "kling3_0",
+   "komut": 8,
+   "fark": 1.45
+  },
+  {
+   "model": "kling3_0",
+   "komut": 9,
+   "fark": 1.447
+  },
+  {
+   "model": "kling3_0",
+   "komut": 10,
+   "fark": 1.444
+  },
+  {
+   "model": "kling3_0",
+   "komut": 11,
+   "fark": 1.452
+  },
+  {
+   "model": "kling3_0",
+   "komut": 12,
+   "fark": 1.458
+  },
+  {
+   "model": "kling3_0",
+   "komut": 13,
+   "fark": 1.46
+  },
+  {
+   "model": "kling3_0",
+   "komut": 14,
+   "fark": 1.448
+  },
+  {
+   "model": "kling3_0",
+   "komut": 15,
+   "fark": 1.465
+  },
+  {
+   "model": "kling3_0",
+   "komut": 16,
+   "fark": 1.456
+  },
+  {
+   "model": "kling3_0",
+   "komut": 17,
+   "fark": 1.482
+  },
+  {
+   "model": "kling3_0",
+   "komut": 18,
+   "fark": 1.45
+  },
+  {
+   "model": "kling3_0",
+   "komut": 19,
+   "fark": 1.472
+  },
+  {
+   "model": "kling3_0",
+   "komut": 20,
+   "fark": 1.458
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 1,
+   "fark": 9.928
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 2,
+   "fark": 13.576
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 3,
+   "fark": 11.266
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 4,
+   "fark": 10.056
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 5,
+   "fark": 10.045
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 6,
+   "fark": 11.829
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 7,
+   "fark": 11.083
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 8,
+   "fark": 10.5
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 9,
+   "fark": 12.032
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 10,
+   "fark": 8.539
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 11,
+   "fark": 9.16
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 12,
+   "fark": 11.813
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 13,
+   "fark": 9.498
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 14,
+   "fark": 11.69
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 15,
+   "fark": 11.323
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 16,
+   "fark": 11.291
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 17,
+   "fark": 11.345
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 18,
+   "fark": 10.269
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 19,
+   "fark": 11.817
+  },
+  {
+   "model": "seedance_2_0_mini",
+   "komut": 20,
+   "fark": 9.403
+  },
+  {
+   "model": "wan3_0",
+   "komut": 1,
+   "fark": 1.498
+  },
+  {
+   "model": "wan3_0",
+   "komut": 2,
+   "fark": 1.497
+  },
+  {
+   "model": "wan3_0",
+   "komut": 3,
+   "fark": 1.498
+  },
+  {
+   "model": "wan3_0",
+   "komut": 4,
+   "fark": 1.499
+  },
+  {
+   "model": "wan3_0",
+   "komut": 5,
+   "fark": 1.502
+  },
+  {
+   "model": "wan3_0",
+   "komut": 6,
+   "fark": 1.501
+  },
+  {
+   "model": "wan3_0",
+   "komut": 7,
+   "fark": 1.501
+  },
+  {
+   "model": "wan3_0",
+   "komut": 8,
+   "fark": 1.496
+  },
+  {
+   "model": "wan3_0",
+   "komut": 9,
+   "fark": 1.498
+  },
+  {
+   "model": "wan3_0",
+   "komut": 10,
+   "fark": 1.496
+  },
+  {
+   "model": "wan3_0",
+   "komut": 11,
+   "fark": 1.497
+  },
+  {
+   "model": "wan3_0",
+   "komut": 12,
+   "fark": 1.499
+  },
+  {
+   "model": "wan3_0",
+   "komut": 13,
+   "fark": 1.498
+  },
+  {
+   "model": "wan3_0",
+   "komut": 14,
+   "fark": 1.498
+  },
+  {
+   "model": "wan3_0",
+   "komut": 15,
+   "fark": 1.498
+  },
+  {
+   "model": "wan3_0",
+   "komut": 16,
+   "fark": 1.499
+  },
+  {
+   "model": "wan3_0",
+   "komut": 17,
+   "fark": 1.498
+  },
+  {
+   "model": "wan3_0",
+   "komut": 18,
+   "fark": 1.501
+  },
+  {
+   "model": "wan3_0",
+   "komut": 19,
+   "fark": 1.498
+  },
+  {
+   "model": "wan3_0",
+   "komut": 20,
+   "fark": 1.498
+  }
+ ]
+}
