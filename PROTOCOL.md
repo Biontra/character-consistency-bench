@@ -90,7 +90,11 @@ Klipler repo dışında durur (`/Volumes/Kye/character-consistency-bench`). `dos
 
 ## Üretimden sonra görülen sınırlar (26 Kasım 2026)
 
-Bu bölüm videolar üretildikten sonra yazıldı. Donmuş kuralları değiştirmez; yalnız üretimde görülenleri kaydeder.
+Bu bölüm videolar üretildikten sonra yazıldı. Üretimde görülenleri kaydeder.
+
+**Videolardan sonra neler değişti.** 25 Kasım'da dondurulan metne dokunulmadı; tek satır silinmedi. Ama videolardan sonra puan koduna ek yapıldı: üretilemeyen klip için hesap, ortak komutlar için hesap ve girdi denetimleri. Geçerli girdilerde eski hesap aynı sonucu veriyor (bağımsız denetimde 400 rastgele girdide fark 0 çıktı; bu denetimde ölçüldü). Donmuş "ölçülemedi" kuralına üretilemeyen klip için fiilen bir ayrım getirildi: üretilemeyen klip "ölçülemedi" sayılmıyor, "komutu yaptı"da yapmadı sayılıyor. Donmuş "sessiz" koşulu Grok ve Gemini Omni'de üretim sırasında sağlanamadı; ses üretimden sonra silindi. Bu, sessiz üretimle aynı şey değil. Aşağıdaki "Üretilemeyen klip kuralı" ve "Ortak komutlar satırı" bölümleri bu çerçevede okunmalı.
+
+Soru türü dökümü (ortak, grup, özel) sorunun TÜRÜNE göre yapılır, sütununa göre değil. Bu yüzden "yaptı" sütununda olup türü özel olan 3 soru hem "komutu yaptı"ya hem "özel" dökümüne girer. Üretilemeyen klipte hiçbir soru döküme girmez. Bu, 25 Kasım'daki kodun davranışıdır; kod değişmedi.
 
 - **Sonuç.** 100 işten 98 klip çıktı. Gemini Omni komut 2 ve 7'yi güvenlik filtresiyle reddetti. Bu iki iş yeniden denenmedi, kredi iade edildi. Bu klipler nasıl puanlanır: aşağıdaki "Üretilemeyen klip kuralı" bölümüne bakın.
 - **Ses.** Grok ve Gemini Omni'de sesi kapatma seçeneği yok. İkisi sesle üretti, ses sonradan ffmpeg ile silindi. Görüntü akışı yeniden kodlanmadı; md5 ile aynı olduğu ölçüldü. Ham dosyalar saklanıyor. Kayıttaki `sha256`, `ses_var` ve ölçümler SESİ SİLİNMİŞ dosyaya aittir. Ham (sesli) dosyaların sha256 değerleri `uretim_kaydi/grok_video_v15_lite.ham.json` ve `uretim_kaydi/gemini_omni_flash_1_2.ham.json` içindedir (Grok 20, Gemini Omni 18 klip; kayıttaki sha256 ile hiçbiri aynı değil). Konuşma komutlarında (1, 2, 3) bu iki modelin sesle üretmenin yararını görmüş olabileceği bir tahmindir; ölçülmedi.
@@ -112,12 +116,12 @@ Bu bölüm videolar üretildikten sonra yazıldı. Donmuş kuralları değiştir
 
   Dolu `sunucu_prompt` satırlarının hepsinde metin gönderilen prompt ile aynı. Bu, sunucunun komutu yeniden yazmadığını kanıtlamaz; yalnız araç yanıtında farklı bir metin dönmediğini gösterir.
 - **İnsan kontrolü klipleri.** `data/insan_secimi.json` içindeki 20 klip, üretilemeyen iki klibe (Gemini Omni komut 2 ve 7) denk gelmedi. Seçim üretimden önce yapıldı: dosya 25 Kasım 2026 11:58'de commit edildi, kayıttaki en eski zaman damgası aynı gün 20:30 UTC. Seçim `tutar/secim.py` ile yapılır: 20 komut tohumla karıştırılır ve modellere 4'er dağıtılır; her komut dosyada tam bir kez geçer. Yani seçim 100 çiftten serbest çekilmedi, 20 komutun beşe bölünmesidir. Hangi klibin üretilemeyeceği seçim sırasında bilinmiyordu.
-- **Kredi.** Hesap düzeyi sayılar (968 başlangıç, 265.5 son bakiye, 100 kesinti, 2 iade) üretim kaydından değil hesap ekranından okundu. Bağımsız denetçi bunları doğrulayamadı. Ayrıntı `uretim_kaydi/kredi_ozeti.md` içinde.
+- **Kredi.** Hesap düzeyi sayılar (968 başlangıç, 265.5 son bakiye, 100 kesinti, 2 iade) üretim kaydından değil hesap ekranından okundu. Bu sayılar hesap ekranından okundu; depodaki kayıtlardan yeniden üretilemez. Ayrıntı `uretim_kaydi/kredi_ozeti.md` içinde.
 - **Eşzamanlılık.** Eşzamanlılık sınırı yüzünden bazı gönderimler iş oluşmadan reddedildi ve yeniden gönderildi (iş oluşmadı, kredi kesilmedi). Oluşmuş hiçbir iş yeniden denenmedi: 100 ayrı iş kimliği. Eşzamanlılık nedeniyle reddedilen gönderimlerin üretim kaydında izi yok; bu bilgi üretim sırasındaki çalışma notlarına dayanıyor ve kayıttan doğrulanamaz. Kayıttan doğrulanan tek şey 100 satırın 100 ayrı iş kimliği taşımasıdır.
 
 ## Üretilemeyen klip kuralı (26 Kasım 2026, videolardan sonra yazıldı)
 
-Bu kural donmuş kurallarda yoktu; videolar üretildikten SONRA eklendi. Donmuş metinleri değiştirmez, yalnız üretilemeyen klibin nasıl puanlanacağını söyler. Etkilediği klipler: `gemini_omni_flash_1_2`, komut 2 ve 7 (güvenlik filtresi reddetti, klip yok). Kural, durumu `reddedildi` ya da `uretim_hatasi` olan her üretilemeyen klip için aynıdır; şu an `uretim_hatasi` olan satır yok.
+Bu kural donmuş kurallarda yoktu; videolar üretildikten SONRA eklendi ("Videolardan sonra neler değişti" paragrafına bakın). Üretilemeyen klibin nasıl puanlanacağını söyler. Etkilediği klipler: `gemini_omni_flash_1_2`, komut 2 ve 7 (güvenlik filtresi reddetti, klip yok). Kural, durumu `reddedildi` ya da `uretim_hatasi` olan her üretilemeyen klip için aynıdır; şu an `uretim_hatasi` olan satır yok.
 
 Neden: model reddettiği için ne ödül ne haksız ceza alsın.
 
@@ -130,7 +134,7 @@ Kod: `tutar/puan.py` içinde `uretilemeyen_klip` ve `model_ozeti`.
 
 ## Ortak komutlar satırı (26 Kasım 2026, videolardan sonra yazıldı)
 
-Bu ek de videolar üretildikten SONRA yazıldı; proje sahibi 26 Kasım 2026'da onayladı. Donmuş metinleri ve yukarıdaki "Üretilemeyen klip kuralı"nın dört maddesini değiştirmez, yalnız bir satır ekler.
+Bu ek de videolar üretildikten SONRA yazıldı; proje sahibi 26 Kasım 2026'da onayladı. Yukarıdaki "Üretilemeyen klip kuralı"nın dört maddesini değiştirmez ve donmuş metne dokunmaz; yalnız bir satır ekler ("Videolardan sonra neler değişti" paragrafına bakın).
 
 Neden: Gemini Omni zor olabilecek iki komutu (2 ve 7) üretmedi, diğer modeller üretti (seçilim etkisi). Modeller aynı komut kümesinde de karşılaştırılmalı.
 

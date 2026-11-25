@@ -22,7 +22,7 @@ Girdi: tek başlangıç resmi ve 20 komut. Komutlar Türkçe yazıldı, modeller
 
 - Hakem Claude'dur. Videodan kod ile saniyede 10 kare ve yakın planlar çıkarılır, hakem bu karelere bakarak cevap verir.
 - 101 soru vardır. Her sorunun dört cevabı olabilir: evet, hayır, görünmüyor, hakem yok. Bir modelin 20 klibinin hepsi üretilirse 343, beş model için 1.715 cevap toplanır. Bir model 2 klip üretemediği için gerçek sayı daha azdır.
-- Sonuç iki ayrı sütundur: "komutu yaptı %" ve "karakteri tuttu %". Tek sayıda toplanmaz. Komut türüne göre döküm de verilir. Sonuç tablosunda model başına "üretti: N/20" sütunu da yer alır.
+- Sonuç iki ayrı sütundur: "komutu yaptı %" ve "karakteri tuttu %". Tek sayıda toplanmaz. Soru türüne (ortak, grup, özel) göre döküm de verilir. Sonuç tablosunda model başına "üretti: N/20" sütunu da yer alır.
 - İnsan kontrolü: kod ile tohumla seçilen 20 klibi hakemin cevabını görmeden elle puanlarım. İnsan ile hakem uyum eşiği %85'tir. Altında çıkarsa sonuç olduğu gibi yayınlanır.
 - Üretilemeyen (reddedilen) klip kuralı videolar üretildikten sonra yazıldı: o komut "yaptı" puanında yapmadı sayılır, "tuttu" puanına girmez (`PROTOCOL.md`).
 - "Karakteri tuttu" puanı ayrıca beş modelin hepsinin ürettiği 18 ortak komut üzerinden de gösterilir; bu satır videolar üretildikten sonra eklendi (`PROTOCOL.md`).

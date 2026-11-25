@@ -1,6 +1,6 @@
 # Kredi özeti
 
-Kaynak: Higgsfield hesap hareketleri, 26 Kasım 2026'da okundu. Bu dosya hesap düzeyinde bir kanıttır. Satır düzeyinde değildir: jsonl dosyalarındaki `kredi_kesinti` alanı bir satır dışında boştur (yalnız `kling3_0` komut 1 dolu, 7.5). Kesintilerin kanıtı satırlardan değil hesap hareketlerinden gelir. Hesap düzeyi sayılar (968, 265.5, 100 kesinti, 2 iade) hesap ekranından okundu; bağımsız denetçi bunları doğrulayamadı.
+Kaynak: Higgsfield hesap hareketleri, 26 Kasım 2026'da okundu. Bu dosya hesap düzeyinde bir kanıttır. Satır düzeyinde değildir: jsonl dosyalarındaki `kredi_kesinti` alanı bir satır dışında boştur (yalnız `kling3_0` komut 1 dolu, 7.5). Kesintilerin kanıtı satırlardan değil hesap hareketlerinden gelir. Hesap düzeyi sayılar (968, 265.5, 100 kesinti, 2 iade) hesap ekranından okundu; depodaki kayıtlardan yeniden üretilemez.
 
 ## Model başı teklif (klip başına)
 
