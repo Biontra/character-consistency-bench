@@ -40,6 +40,8 @@ Sorular, cevap anahtarı, başlangıç resmi, videolar ve kareler gizlidir. Soru
 
 Süreç ve dondurma kuralları için `PROTOCOL.md` dosyasına bakın.
 
+Üretimden sonra görülen sınırlar `PROTOCOL.md` içindeki "Üretimden sonra görülen sınırlar (26 Kasım 2026)" bölümünde.
+
 ## Sonuçlar
 
 Henüz üretim yapılmadı.
