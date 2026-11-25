@@ -48,9 +48,11 @@ Yalnız `evet` ve `hayir` puana girer.
 
 ## Dondurma kontrol listesi
 
-- [ ] Tüm testler geçti
-- [ ] Sızıntı taraması temiz (git'te gizli dosya, resim, video yok)
-- [ ] Komutlar ve modeller açık veri olarak commit edildi
-- [ ] Gizli soru dosyasının parmak izi commit edildi
-- [ ] Hakem talimatı commit edildi
-- [ ] `tutar-kurallar-v1` etiketi konuldu
+- [x] Tüm testler geçti
+- [x] Sızıntı taraması temiz (git'te gizli dosya, resim, video yok)
+- [x] Komutlar ve modeller açık veri olarak commit edildi
+- [x] Gizli soru dosyasının parmak izi commit edildi
+- [x] Hakem talimatı commit edildi
+- [x] `tutar-kurallar-v1` etiketi konuldu
+
+Dondurma tarihi: 25 Kasım 2026. Bu tarihte hiçbir video üretilmemişti.

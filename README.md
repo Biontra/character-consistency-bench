@@ -1,4 +1,4 @@
-# TUTAR
+# Character Consistency Bench (TUTAR)
 
 TUTAR, video modellerinin bir karaktere iş yaptırırken karakteri bozmadan tutup tutamadığını ölçen küçük bir benchmark'tır.
 
