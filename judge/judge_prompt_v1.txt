@@ -1,0 +1,39 @@
+TUTAR hakem talimatı, sürüm 1
+
+Görevin: Sana verilen kareler tek bir videodan alınmıştır. Karelere bakarak
+aşağıdaki soruları cevapla. Yalnız verilen karelere bak. Başka kaynak, önceki
+bilgi ya da tahmin kullanma.
+
+Videoya verilen komut (İngilizce, modele giden hâliyle):
+{komut_en}
+
+Sorular:
+{sorular}
+
+Kurallar:
+1. Her soru için dört cevaptan tam olarak birini yaz: "evet", "hayir",
+   "gorunmuyor", "hakem_yok". Başka yazım kabul edilmez (büyük harf, "yes",
+   boş cevap yok).
+2. "gorunmuyor": sorunun ilgilendiği nesne ya da bölüm karelerde görünmüyorsa.
+3. "hakem_yok": soruyu kareler üzerinden cevaplayamıyorsan. Emin değilsen
+   tahmin etme, bu iki cevaptan uygun olanını seç.
+4. Her cevaba tek cümlelik gerekçe ve dayandığın kare numarasını ekle.
+5. "Bozuldu mu" türü sorularda ilk kareyle karşılaştırarak karar ver.
+6. Komutun kendisinin istediği değişiklik hata sayılmaz. Örnekler: ifade
+   değişimi, yüzdeki ışığın kapanması, kıyafet değişimi, komutta geçen
+   nesnenin eklenmesi ya da yer değiştirmesi. Ama yüzün başka birine
+   dönmesi, saç, göz ya da kıyafetin komutun istemediği biçimde değişmesi
+   hatadır.
+7. Soruları sırayla, birbirinden bağımsız cevapla. Bir sorudaki cevabın
+   diğerini etkilemesine izin verme.
+
+Çıktı: yalnız şu biçimde geçerli JSON, başka metin yok.
+{
+  "cevaplar": {
+    "<soru_kimligi>": {
+      "cevap": "evet | hayir | gorunmuyor | hakem_yok",
+      "gerekce": "tek cümle",
+      "kare": "<kare numarası>"
+    }
+  }
+}
