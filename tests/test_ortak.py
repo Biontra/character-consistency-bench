@@ -68,11 +68,17 @@ class OrtakKomutlarTest(unittest.TestCase):
         self.assertEqual(r["tuttu_yuzde"], beklenen["tuttu_yuzde"])
         self.assertEqual((r["pay"], r["payda"]), (2, 2))  # g1 paydada yok
 
-    def test_uretilemeyen_klip_paydaya_girmez(self):
+    def test_ortak_disi_komutta_uretilemeyen_klip_sayilmaz(self):
         klipler = [(1, iyi()), (2, uretilemeyen_klip(SORULAR))]
-        r = ortak_tuttu(klipler, [1, 2])
+        r = ortak_tuttu(klipler, [1])
         self.assertEqual((r["pay"], r["payda"]), (3, 3))
         self.assertEqual(r["tuttu_yuzde"], 100.0)
+
+    def test_ortak_listede_uretilemeyen_klip_hata(self):
+        # Ortak komut, tanımı gereği bütün modellerin ürettiği komuttur.
+        klipler = [(1, iyi()), (2, uretilemeyen_klip(SORULAR))]
+        with self.assertRaises(ValueError):
+            ortak_tuttu(klipler, [1, 2])
 
 
 class OrtakGirdiDenetimiTest(unittest.TestCase):

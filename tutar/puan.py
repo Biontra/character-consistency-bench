@@ -21,8 +21,8 @@ def _sutun_kontrol(sorular):
     for s in sorular:
         if s["sutun"] not in SORU_SUTUNLARI:
             raise ValueError(f"bilinmeyen sutun {s['sutun']!r} (soru {s['id']})")
-        if s["sutun"] != "puansiz" and s["tur"] not in IZINLI_TURLER:
-            raise ValueError(f"bilinmeyen tur {s['tur']!r} (soru {s['id']})")
+        if s["sutun"] != "puansiz" and s.get("tur") not in IZINLI_TURLER:
+            raise ValueError(f"bilinmeyen tur {s.get('tur')!r} (soru {s['id']})")
 
 
 def klip_puanla(sorular, cevaplar):
@@ -146,7 +146,10 @@ def ortak_tuttu(klipler_komutla, ortak):
 
     Girdi (komut_no, klip_sonucu) çiftleri ve ortak komut listesi. Havuzlama
     model_puanla ile yapılır, kurallar aynıdır. Payda 0 ise yüzde None.
-    Aynı komut numarası iki kez ya da ortak komutun kliple verilmemesi ValueError.
+    Aynı komut numarası iki kez, ortak komutun kliple verilmemesi ya da ortak
+    listedeki bir komutun klibinin üretilemedi işaretli olması ValueError:
+    ortak komut tanımı gereği bütün modellerin ürettiği komuttur. Ortak
+    olmayan komutta üretilemeyen klip bu hesapta zaten hiç sayılmaz.
     """
     gorulen = set()
     for no, _ in klipler_komutla:
@@ -156,6 +159,9 @@ def ortak_tuttu(klipler_komutla, ortak):
     secili = set(ortak)
     for no in sorted(secili - gorulen):
         raise ValueError(f"ortak komut {no} klipler arasında yok")
+    for no, k in klipler_komutla:
+        if no in secili and k.get("uretilemedi"):
+            raise ValueError(f"ortak komut {no} için klip üretilemedi")
     klipler = [k for no, k in klipler_komutla if no in secili]
     ozet = model_puanla(klipler)
     pay = sum(k["tuttu"][0] for k in klipler)

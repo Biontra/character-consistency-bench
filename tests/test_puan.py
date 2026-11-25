@@ -242,6 +242,14 @@ class TurDenetimiTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             uretilemeyen_klip(sorular)
 
+    def test_puanli_soruda_tur_anahtari_yoksa_valueerror(self):
+        eksik = {"id": "x1", "sutun": "tuttu", "beklenen": "evet", "eyleme_bagli": False}
+        sorular = [soru("y1", "yapti", "yapti"), eksik]
+        with self.assertRaises(ValueError):
+            klip_puanla(sorular, {"y1": "evet", "x1": "evet"})
+        with self.assertRaises(ValueError):
+            uretilemeyen_klip(sorular)
+
     def test_puansiz_sorunun_turu_denetlenmez(self):
         sorular = [soru("y1", "yapti", "yapti"), soru("b1", "baska", "puansiz", beklenen=None)]
         klip_puanla(sorular, {"y1": "evet", "b1": "evet"})
