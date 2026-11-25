@@ -75,5 +75,19 @@ class OrtakKomutlarTest(unittest.TestCase):
         self.assertEqual(r["tuttu_yuzde"], 100.0)
 
 
+class OrtakGirdiDenetimiTest(unittest.TestCase):
+    def test_ayni_komut_iki_kez_hata(self):
+        with self.assertRaises(ValueError):
+            ortak_tuttu([(1, iyi()), (1, kotu())], [1])
+
+    def test_ortak_komut_klipler_arasinda_yoksa_hata(self):
+        with self.assertRaises(ValueError):
+            ortak_tuttu([(1, iyi())], [1, 2])
+
+    def test_tekrar_ortak_disi_komutta_da_hata(self):
+        with self.assertRaises(ValueError):
+            ortak_tuttu([(1, iyi()), (3, iyi()), (3, iyi())], [1])
+
+
 if __name__ == "__main__":
     unittest.main()

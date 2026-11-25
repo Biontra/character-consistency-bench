@@ -3,6 +3,9 @@
 CEVAPLAR = ("evet", "hayir", "gorunmuyor", "hakem_yok")
 SUTUNLAR = ("yapti", "tuttu")
 TURLER = ("ortak", "grup", "ozel")
+# Puanlı sorularda görülen tur değerleri: TURLER ve "yapti" (komut sorusu).
+# Puansız soruların turu denetlenmez.
+IZINLI_TURLER = TURLER + ("yapti",)
 PUANLANABILIR = ("evet", "hayir")
 
 
@@ -18,6 +21,8 @@ def _sutun_kontrol(sorular):
     for s in sorular:
         if s["sutun"] not in SORU_SUTUNLARI:
             raise ValueError(f"bilinmeyen sutun {s['sutun']!r} (soru {s['id']})")
+        if s["sutun"] != "puansiz" and s["tur"] not in IZINLI_TURLER:
+            raise ValueError(f"bilinmeyen tur {s['tur']!r} (soru {s['id']})")
 
 
 def klip_puanla(sorular, cevaplar):
@@ -141,8 +146,16 @@ def ortak_tuttu(klipler_komutla, ortak):
 
     Girdi (komut_no, klip_sonucu) çiftleri ve ortak komut listesi. Havuzlama
     model_puanla ile yapılır, kurallar aynıdır. Payda 0 ise yüzde None.
+    Aynı komut numarası iki kez ya da ortak komutun kliple verilmemesi ValueError.
     """
+    gorulen = set()
+    for no, _ in klipler_komutla:
+        if no in gorulen:
+            raise ValueError(f"komut {no} birden fazla kez verildi")
+        gorulen.add(no)
     secili = set(ortak)
+    for no in sorted(secili - gorulen):
+        raise ValueError(f"ortak komut {no} klipler arasında yok")
     klipler = [k for no, k in klipler_komutla if no in secili]
     ozet = model_puanla(klipler)
     pay = sum(k["tuttu"][0] for k in klipler)

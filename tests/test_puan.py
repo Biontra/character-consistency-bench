@@ -231,5 +231,26 @@ class UyumTest(unittest.TestCase):
         self.assertEqual(CEVAPLAR, ("evet", "hayir", "gorunmuyor", "hakem_yok"))
 
 
+class TurDenetimiTest(unittest.TestCase):
+    def test_taninmayan_tur_klip_puanlada_hata(self):
+        sorular = [soru("y1", "yapti", "yapti"), soru("x1", "ozl", "tuttu")]
+        with self.assertRaises(ValueError):
+            klip_puanla(sorular, {"y1": "evet", "x1": "evet"})
+
+    def test_taninmayan_tur_uretilemeyen_klipte_hata(self):
+        sorular = [soru("y1", "yapti", "yapti"), soru("x1", "ozl", "tuttu")]
+        with self.assertRaises(ValueError):
+            uretilemeyen_klip(sorular)
+
+    def test_puansiz_sorunun_turu_denetlenmez(self):
+        sorular = [soru("y1", "yapti", "yapti"), soru("b1", "baska", "puansiz", beklenen=None)]
+        klip_puanla(sorular, {"y1": "evet", "b1": "evet"})
+        uretilemeyen_klip(sorular)
+
+    def test_izinli_turler_kumesi(self):
+        from tutar.puan import IZINLI_TURLER
+        self.assertEqual(set(IZINLI_TURLER), {"ortak", "grup", "ozel", "yapti"})
+
+
 if __name__ == "__main__":
     unittest.main()
