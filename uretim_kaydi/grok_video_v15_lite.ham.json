@@ -1,0 +1,145 @@
+{
+ "aciklama": "Model sesi kendisi uretiyor, kapatma parametresi yok. Ses uretimden sonra ffmpeg -an -c:v copy ile silindi; goruntu yeniden kodlanmadi.",
+ "klipler": {
+  "1": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd01.mp4",
+   "ham_sha256": "1d7d4e02341ec2ef63382a6612ec054c97a32a54e7c3b3326afb9cbfc5334561",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "2": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd02.mp4",
+   "ham_sha256": "15f788d1e9ebc837046d46bfb3f92c7a204f4ccdd3c74476e8f298db95ee8c64",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "3": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd03.mp4",
+   "ham_sha256": "6d3b2303a2dffea0eb38a23d498c9c869bce6cfc5f2e6c59c2d6990addee0589",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "4": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd04.mp4",
+   "ham_sha256": "461214eeb3565d6d32fabeb68eb396e734abb669fbf71ecc64989de495e7b7db",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "5": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd05.mp4",
+   "ham_sha256": "42f00480ee396b3683d5aba712cdfcd292ad75de5d43179672ee0596e99cb33e",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "6": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd06.mp4",
+   "ham_sha256": "fe02b110b7f4df4b5af031c0357d44ec89d50a522ed4595dec53d770df6e58e9",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "7": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd07.mp4",
+   "ham_sha256": "684c44be0ffea83f530962f096f1e1489b89453773c9f42af4f955d1ef6551ae",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "8": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd08.mp4",
+   "ham_sha256": "acd9f8d33d91105665f48c9c81dc4b77ffcbac0819f6a39c53759665de109fcb",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "9": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd09.mp4",
+   "ham_sha256": "56806437b0b49b4549ce328105878de7411affc82f3f62c1df99481ea2aa9c19",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "10": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd10.mp4",
+   "ham_sha256": "0bb337ec04300dfbcc81eb84caf4c8272e9659f2f743b985efbb2534f0d0c5cc",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "11": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd11.mp4",
+   "ham_sha256": "7d7da760f33010d3ffaba50019b5ff1f35042f7a98cabc87816d1969c0426a4f",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "12": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd12.mp4",
+   "ham_sha256": "4e4ae7132a5a88b130b7e112587b1981fa51ac29f78f986f1bf3a18a9b043d8a",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "13": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd13.mp4",
+   "ham_sha256": "b1de0639b2ba3abf3e245d2666bc8fbf2e44cf16534e4cc591ca0240bf89eb52",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "14": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd14.mp4",
+   "ham_sha256": "5804e9e6859226177d7c26cf615aaa055d224391cb0fd4708e4fa05cee3b7384",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "15": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd15.mp4",
+   "ham_sha256": "d5f2b08cee0e838508549e50f9fdc429bb4823fd39b8e2dcb47f3c636a5e2c6e",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "16": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd16.mp4",
+   "ham_sha256": "d331ef2dad5aeb5276080d61f25b98c6f34458e4fec297047d607caf4ec1bac8",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "17": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd17.mp4",
+   "ham_sha256": "e31624e0873b8e8831a7514932efc7ad0ea2fed6c84a3d5bb4f77bd5763ea2b5",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "18": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd18.mp4",
+   "ham_sha256": "39f2c45815a359a324428dab6d418ac3c9fa59912ee24f2a867b2168002b1902",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "19": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd19.mp4",
+   "ham_sha256": "4e9083df9991181b8624d035cf9f2a9ed59932432253f113c7ede444db930198",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  },
+  "20": {
+   "ham_dosya": "clips_ham/grok_video_v15_lite/cmd20.mp4",
+   "ham_sha256": "a6ed1eca23bff67d9e0416ae21d5a3976ccf71c2790402657051a33d6d493e6c",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.041667,
+   "video_akisi_ayni": true
+  }
+ }
+}

@@ -1,0 +1,131 @@
+{
+ "aciklama": "Model sesi kendisi uretiyor, kapatma parametresi yok. Ses uretimden sonra ffmpeg -an -c:v copy ile silindi; goruntu yeniden kodlanmadi.",
+ "klipler": {
+  "1": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd01.mp4",
+   "ham_sha256": "cc821abf58ff8aee54e8bca97b3c7b8b1e9a7590033d42c6c316b0fea415c78c",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "3": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd03.mp4",
+   "ham_sha256": "e9dd1d301677bfc41f957fe6606d29612f3a0b2011bdfdb9948fbf54a0f1d5d3",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "4": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd04.mp4",
+   "ham_sha256": "587ce8e514478972b0ccfe0b773e71fc88183034d2544dc5cbba54176318a8db",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "5": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd05.mp4",
+   "ham_sha256": "3dbaa254d52cbbdd2d0834325e90357221b9d1d5a694227a0efeb2bd1774d5c4",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "6": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd06.mp4",
+   "ham_sha256": "3524222c95e20dcaf4fe1758dec2f1350ba8c570dc70982d51b21cf9c299c3d0",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "8": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd08.mp4",
+   "ham_sha256": "3c27dfa13f57f48755a2ee55e147ce39eba7a29e6c421802b2d23bc762163b15",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "9": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd09.mp4",
+   "ham_sha256": "6ab9ac57a9c37d02a8931e06f64e924a368bf5305780518e7446ba488b3f43ce",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "10": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd10.mp4",
+   "ham_sha256": "8005420fcf7c5627f056a7dede7073acc192aeb7f80835d9c5f72315aba96dae",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "11": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd11.mp4",
+   "ham_sha256": "0c2fd0488ace2e8e939db183f2c1f96a95b312ff698b5b8f60d04928372be7d9",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "12": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd12.mp4",
+   "ham_sha256": "6ba26c8a9ee3167fb4d6b57cca399d37a4f55d0d4be385475d35fb8010eac79d",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "13": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd13.mp4",
+   "ham_sha256": "be789fbde4d4770a114edb2b7c93d5a5045044cae318d06f59c833977662c435",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "14": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd14.mp4",
+   "ham_sha256": "3959f6167751b358bbb86fff1414c6aec0e8d1f199fc8ed4e82b0016f89fc089",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "15": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd15.mp4",
+   "ham_sha256": "61d6accd498f365ea6595f5e68ee07e3b6ebe8fcf06e3b947975df910c244284",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "16": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd16.mp4",
+   "ham_sha256": "4dcfdad47de7afb28bdd062a91b0ad490e0623440a1b1a8bb71df9677ae20727",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "17": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd17.mp4",
+   "ham_sha256": "dcd082b6d174749756b9ba3ec6743ae0936618e92beb4d1ff34d85b6ea10ac2a",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "18": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd18.mp4",
+   "ham_sha256": "298e6c468d0b772ad8f59370775f33f18a5e0ae3e80a5097dddfe01818ec6ab7",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "19": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd19.mp4",
+   "ham_sha256": "c676bf370f94aed30bfd9540346b934b89853a51392e43fe62631eec82d454e0",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  },
+  "20": {
+   "ham_dosya": "clips_ham/gemini_omni_flash_1_2/cmd20.mp4",
+   "ham_sha256": "df3fac74b60a52bfd7fa63c57f3404b7b07d4816251860fd702128c61ea165f2",
+   "ham_ses_codec": "aac",
+   "ham_sure_sn": 5.035,
+   "video_akisi_ayni": true
+  }
+ }
+}
