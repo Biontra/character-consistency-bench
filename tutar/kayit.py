@@ -14,7 +14,11 @@ ALANLAR = (
 DURUMLAR = ("tamam", "uretim_hatasi", "reddedildi")
 ZENGINLESTIRME = ("kapatildi", "secenek_yok", "kapatilamadi")
 _YOL = re.compile(r"^clips/([^/]+)/cmd(\d{2})\.mp4$")
-_TAMAM_DOLU = ("sha256", "sure_sn", "genislik", "yukseklik")
+_TAMAM_DOLU = ("sha256", "sure_sn", "genislik", "yukseklik",
+               "kare_sayisi", "fps", "ses_var")
+BASLANGIC_RESMI_SHA256 = (
+    "01aa3597b8f0d4e666412f00a4f199cc3e3cd0aea80d6f8175900a77806eadb1"
+)
 
 
 def satir_dogrula(satir: dict) -> None:
@@ -38,6 +42,8 @@ def satir_dogrula(satir: dict) -> None:
     m = _YOL.match(satir["dosya"]) if isinstance(satir["dosya"], str) else None
     if not m or m.group(1) != satir["model"] or int(m.group(2)) != k:
         raise ValueError(f"dosya yolu kalibina uymuyor: {satir['dosya']!r}")
+    if satir["baslangic_resmi_sha256"] != BASLANGIC_RESMI_SHA256:
+        raise ValueError("baslangic_resmi_sha256 sabit degere esit degil")
     if satir["durum"] == "tamam":
         bos = [a for a in _TAMAM_DOLU if satir[a] is None]
         if bos:

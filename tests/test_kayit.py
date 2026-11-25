@@ -7,6 +7,7 @@ from pathlib import Path
 from tutar import kayit
 
 KOK = Path(__file__).resolve().parent.parent
+RESIM_SHA = "01aa3597b8f0d4e666412f00a4f199cc3e3cd0aea80d6f8175900a77806eadb1"
 
 
 def gecerli():
@@ -14,7 +15,7 @@ def gecerli():
         "model": "m1", "komut": 1, "prompt": "p", "durum": "tamam", "hata": None,
         "is_kimligi": "j", "tarih_saat_utc": "2026-11-25T20:30:06Z",
         "gonderilen_parametreler": {"a": 1},
-        "baslangic_resmi_sha256": "ab", "baslangic_medya_kimligi": "id",
+        "baslangic_resmi_sha256": RESIM_SHA, "baslangic_medya_kimligi": "id",
         "dosya": "clips/m1/cmd01.mp4", "sha256": "cd", "sure_sn": 5.04,
         "kare_sayisi": 121, "genislik": 720, "yukseklik": 1280, "fps": 24,
         "ses_var": False, "kredi_teklif": 7.5, "kredi_kesinti": 7.5,
@@ -66,6 +67,48 @@ class KayitTest(unittest.TestCase):
         s = gecerli(); s["sha256"] = None
         with self.assertRaises(ValueError):
             kayit.satir_dogrula(s)
+
+    def test_tamam_kare_sayisi_null(self):
+        s = gecerli(); s["kare_sayisi"] = None
+        with self.assertRaises(ValueError):
+            kayit.satir_dogrula(s)
+
+    def test_tamam_fps_null(self):
+        s = gecerli(); s["fps"] = None
+        with self.assertRaises(ValueError):
+            kayit.satir_dogrula(s)
+
+    def test_tamam_ses_var_null(self):
+        s = gecerli(); s["ses_var"] = None
+        with self.assertRaises(ValueError):
+            kayit.satir_dogrula(s)
+
+    def test_tamam_ses_var_false_gecerli(self):
+        s = gecerli(); s["ses_var"] = False
+        kayit.satir_dogrula(s)
+
+    def test_baslangic_resmi_sha_farkli(self):
+        s = gecerli(); s["baslangic_resmi_sha256"] = "ab" * 32
+        with self.assertRaises(ValueError):
+            kayit.satir_dogrula(s)
+
+    def test_baslangic_resmi_sha_null(self):
+        s = gecerli(); s["baslangic_resmi_sha256"] = None
+        with self.assertRaises(ValueError):
+            kayit.satir_dogrula(s)
+
+    def test_reddedilen_satirda_sha_sabit_yine_istenir(self):
+        s = gecerli()
+        s.update(durum="reddedildi", hata="x", sha256=None, sure_sn=None,
+                 genislik=None, yukseklik=None, kare_sayisi=None, fps=None,
+                 ses_var=None)
+        kayit.satir_dogrula(s)
+        s["baslangic_resmi_sha256"] = "ab"
+        with self.assertRaises(ValueError):
+            kayit.satir_dogrula(s)
+
+    def test_sabit_deger(self):
+        self.assertEqual(kayit.BASLANGIC_RESMI_SHA256, RESIM_SHA)
 
     def test_hata_satiri_null_olabilir(self):
         s = gecerli()
