@@ -3,7 +3,9 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
+from tutar import kareler
 from tutar.kareler import kare_cikar
 
 FFMPEG = "/opt/homebrew/bin/ffmpeg"
@@ -57,6 +59,25 @@ class KareCikarTest(unittest.TestCase):
         bozuk.write_text("bu bir video degil")
         with self.assertRaises(RuntimeError):
             kare_cikar(bozuk, self.gecici / "y")
+        self.assertFalse((self.gecici / "y").exists())
+
+    def test_ikinci_cagri_eski_kareleri_temizler(self):
+        hedef = self.gecici / "tekrar"
+        ilk = kare_cikar(self.klip, hedef, fps=10)
+        ikinci = kare_cikar(self.klip, hedef, fps=5)
+        self.assertLess(ikinci["kare_sayisi"], ilk["kare_sayisi"])
+        for k in ("tam", "ust", "alt"):
+            self.assertEqual(len(list((hedef / k).glob("*.png"))), ikinci["kare_sayisi"])
+
+    def test_ffmpeg_hata_kodu(self):
+        with mock.patch.object(kareler, "FFMPEG", "/usr/bin/false"):
+            with self.assertRaises(RuntimeError):
+                kare_cikar(self.klip, self.gecici / "h1")
+
+    def test_sifir_kare(self):
+        with mock.patch.object(kareler, "FFMPEG", "/usr/bin/true"):
+            with self.assertRaisesRegex(RuntimeError, "Hiç kare"):
+                kare_cikar(self.klip, self.gecici / "h2")
 
 
 if __name__ == "__main__":

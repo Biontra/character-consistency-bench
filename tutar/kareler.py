@@ -39,6 +39,10 @@ def kare_cikar(klip: Path, hedef: Path, fps: int = 10) -> dict:
     bilgi = _bilgi(klip)
     for ad in ("tam", "ust", "alt"):
         (hedef / ad).mkdir(parents=True, exist_ok=True)
+        # Eski çalıştırmadan kalan kareler sayıyı bozmasın.
+        for eski in (hedef / ad).glob("*.png"):
+            eski.unlink()
+    # Not: yükseklik tek sayıysa alttaki 1 satır iki yarıda da dışarıda kalır.
     yarim = bilgi["yukseklik"] // 2
     g = bilgi["genislik"]
     kolu = (
