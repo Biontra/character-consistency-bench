@@ -124,6 +124,24 @@ Neden: model reddettiği için ne ödül ne haksız ceza alsın.
 1. Sonuç tablosuna model başına "üretti: N/20" sütunu eklenir.
 2. "Komutu yaptı" puanında üretilemeyen komut yapmadı sayılır: o komutun "yaptı mı" soruları (sütun `yapti`) paydaya girer, paya girmez.
 3. "Karakteri tuttu" puanına üretilemeyen komut hiç girmez (ne paya ne paydaya), çünkü ortada bozulmuş bir karakter yok. Soru türü kırılımlarına (ortak, grup, özel) da girmez.
-4. Bu kural videolar üretildikten sonra yazıldı. Gemini Omni'nin hem "komutu yaptı" hem "karakteri tuttu" puanı bu notla okunmalı. "Yaptı" puanında iki komut yapmadı sayılır. "Tuttu" puanında ise model zor olabilecek iki komutu üretmediği için o komutlarda karakter bozulması riskini taşımadı, diğer dört model taşıdı (seçilim etkisi). Bu yüzden Gemini Omni'nin "tuttu" puanı diğer dört modelle birebir kıyaslanamaz.
+4. Bu kural videolar üretildikten sonra yazıldı. Gemini Omni'nin hem "komutu yaptı" hem "karakteri tuttu" puanı bu notla okunmalı. "Yaptı" puanında iki komut yapmadı sayılır. "Tuttu" puanında ise model zor olabilecek iki komutu üretmediği için o komutlarda karakter bozulması riskini taşımadı, diğer dört model taşıdı (seçilim etkisi). Bu yüzden Gemini Omni'nin "tuttu" puanı diğer dört modelle birebir kıyaslanamaz (bunun için ortak komutlar satırı eklendi, aşağıdaki bölüme bakın).
 
 Kod: `tutar/puan.py` içinde `uretilemeyen_klip` ve `model_ozeti`.
+
+## Ortak komutlar satırı (26 Kasım 2026, videolardan sonra yazıldı)
+
+Bu ek de videolar üretildikten SONRA yazıldı; proje sahibi 26 Kasım 2026'da onayladı. Donmuş metinleri ve yukarıdaki "Üretilemeyen klip kuralı"nın dört maddesini değiştirmez, yalnız bir satır ekler.
+
+Neden: Gemini Omni zor olabilecek iki komutu (2 ve 7) üretmedi, diğer modeller üretti (seçilim etkisi). Modeller aynı komut kümesinde de karşılaştırılmalı.
+
+"Karakteri tuttu" puanı sonuç tablosunda iki biçimde gösterilir:
+
+- (a) Modelin ürettiği bütün klipler üzerinden. Mevcut hesaptır, değişmez.
+- (b) Beş modelin HEPSİNİN ürettiği ortak komutlar üzerinden. Şu an ortak küme 18 komuttur (2 ve 7 hariç).
+
+Sınırlar:
+
+- Yalnız "karakteri tuttu" puanı için geçerlidir. "Komutu yaptı" puanı ve soru türü kırılımı için ortak satır yoktur.
+- Üretilemeyen klip kuralının dört maddesi aynen geçerlidir.
+
+Kod: `tutar/puan.py` içinde `ortak_komutlar` ve `ortak_tuttu` (`ortak_tuttu`, `model_puanla` ile havuzlar).
