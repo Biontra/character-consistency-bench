@@ -1,12 +1,15 @@
 """Hakem aşaması hazırlığı. Hakemi ÇALIŞTIRMAZ.
 
 Kullanım: python3 scripts/hakem_hazirla.py [--kok /Volumes/Kye/character-consistency-bench]
-                                           [--yalniz-esleme]
+                                           [--yalniz-esleme | --yalniz-metin]
 
 - uretim_kaydi'ndan durum == "tamam" çiftlerini alır, K001.. kodlarını verir.
-- secret/hakem/esleme.json ve secret/hakem/girdi/Kxxx.txt yazar (git'e girmez).
-- Kareleri <kok>/hakem_girdi/Kxxx/{tam,ust,alt}/NNN.png olarak kopyalar.
+- secret/hakem/esleme.json yazar (git'e girmez).
+- Kareleri <kok>/hakem_girdi/Kxxx/{tam,ust,alt}/NNN.png olarak kopyalar ve hakemin
+  metnini <kok>/hakem_girdi/Kxxx/sorular.txt olarak yazar (depo ve eşleme dışında).
+- Hakemin cevabını yazacağı klasör <kok>/hakem_cikti/ oluşturulur (içi boş kalır).
 --yalniz-esleme: yalnız esleme.json yazar, kopyalamaz.
+--yalniz-metin: kareleri kopyalamaz (klasörler hazır olmalı), yalnız sorular.txt yazar.
 Yalnız stdlib.
 """
 import argparse
@@ -39,7 +42,9 @@ def tamam_ciftler():
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--kok", default=str(KOK_VARSAYILAN))
-    ap.add_argument("--yalniz-esleme", action="store_true")
+    grup = ap.add_mutually_exclusive_group()
+    grup.add_argument("--yalniz-esleme", action="store_true")
+    grup.add_argument("--yalniz-metin", action="store_true")
     a = ap.parse_args(argv)
     kok = Path(a.kok)
 
@@ -48,7 +53,7 @@ def main(argv=None):
     kodlar = klip_kodlari(ciftler)
 
     hakem_dizin = DEPO / "secret" / "hakem"
-    (hakem_dizin / "girdi").mkdir(parents=True, exist_ok=True)
+    hakem_dizin.mkdir(parents=True, exist_ok=True)
     esleme = [{"klip": kodlar[c], "model": c[0], "komut": c[1]} for c in ciftler]
     esleme.sort(key=lambda r: r["klip"])
     (hakem_dizin / "esleme.json").write_text(
@@ -70,10 +75,15 @@ def main(argv=None):
             raise SystemExit(f"komut metni uretim kaydiyla uyusmuyor: {r['klip']}")
         metin = hakem_metni(sablon, komutlar[k],
                             [sorular[i] for i in checks["komutlar"][str(k)]])
-        (hakem_dizin / "girdi" / f"{r['klip']}.txt").write_text(metin, encoding="utf-8")
-        kaynak = kok / "frames" / m / f"cmd{k:02d}"
-        kare_kopyala(kaynak, kok / "hakem_girdi" / r["klip"])
-    print(f"girdi metni ve kare klasoru: {len(esleme)}")
+        hedef = kok / "hakem_girdi" / r["klip"]
+        if a.yalniz_metin:
+            if not hedef.is_dir():
+                raise SystemExit(f"kare klasoru yok: {r['klip']}")
+        else:
+            kare_kopyala(kok / "frames" / m / f"cmd{k:02d}", hedef)
+        (hedef / "sorular.txt").write_text(metin, encoding="utf-8")
+    (kok / "hakem_cikti").mkdir(parents=True, exist_ok=True)
+    print(f"sorular.txt ve kare klasoru: {len(esleme)}")
     return 0
 
 
