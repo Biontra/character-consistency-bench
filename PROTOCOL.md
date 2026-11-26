@@ -333,3 +333,22 @@ Bu bölüm yalnız ekleme yapar; yukarıdaki hiçbir satır değişmedi. Hakem c
 1. **Tek grafik eklendi.** Görev metni doğruluk ve doğru cevap başına maliyetin tek grafikte olmasını istiyor; `results/grafik_dogruluk_maliyet.svg` bunu verir (solda "komutu yaptı %" ve "karakteri tuttu %" ayrı çubuklar, sağda ayrı eksenle tutulan karakter cevabı başına kredi). İki sütun yine toplanmaz, tek bir "doğruluk" sayısı üretilmez. Önceki iki grafik duruyor.
 2. **Soru bazlı `sonuclar.csv` üretilmez.** Görev metni soru bazlı bir `sonuclar.csv` istiyor; açık depoda model başına özet yayımlanır, çünkü soru bazlı dosya cevap anahtarını açar. Soru bazlı dosya yalnız kapalı veri setine konacak.
 3. **Klip sayısı.** RESULTS.md'deki "İnsan N klibi puanladı" sayısı sabit değil, uyum raporunun `klip_sayisi` alanından okunur; alan yoksa araç hata verir.
+
+## Sonuç tablosu koduna ekler 2 (26 Kasım 2026)
+
+Gemini'nin (gemini-4-argon-medium) sonuç tablosu kodunu okuyup yaptığı itirazlardan sonra, gerçek veriyle hiç çalıştırılmadan önce yapılan değişiklikler ve yazılan sınırlar. Kod değişikliğini Gemini yazdı, 312 test Claude tarafından çalıştırıldı. Grafikler gözle kontrol edilmedi (doğrulanmadı).
+
+Değişiklikler:
+
+1. RESULTS.md'deki uyum bölümü artık net uyumu (evet/hayır birimleri), görünmüyor / hakem_yok çiftini, tümü hakem_yok olan kliplerin listesini ve karışıklık tablosunu da yazar. Raporda olmayan alan için "raporda yok" yazılır.
+2. Grafiklerde model adları eğik yazılır, genişlik model sayısına göre büyür, her çubuğun yanında pay/payda vardır.
+3. Maliyet iki ayrı sayıyla verilir: bütün kliplerin kredisi üzerinden (eski sayı, değişmedi) ve yalnız hakemin puanladığı kliplerin kredisi üzerinden ("puanlanan").
+4. Tabloda ve grafiklerde yüzdeler aynı biçimde, bir ondalıkla yazılır.
+5. Üretim kaydı yoksa ya da boşsa, aynı (model, komut) iki kez geçerse, kredi alanı sayı değilse ya da negatifse betik durur (çıkış kodu 1).
+
+Sınırlar (kodla çözülmedi, sonuç okunurken bilinmeli):
+
+1. "Ortak komutlar" satırı her model için birebir aynı klip kümesi değildir: tümü hakem_yok olan klipler bazı modellerde o komutu ölçümün dışına çıkarır.
+2. `eylem_yok` kuralı, komutu hiç yapmayan modelin lehine çalışabilir: eylem olmayınca karakteri bozacak hareket de azalır, "tuttu" oranı yükselebilir. Bu yüzden "tuttu" oranı "yaptı" oranıyla birlikte okunmalıdır.
+3. "Hakemin puanladığı klip" sütunu, en az bir hakem cevabı olan klipleri sayar; o klipteki her sorunun cevaplandığı anlamına gelmez. "Üretti 20/20" yazan bir modelin bütün klipleri puanlanmış olmayabilir. Birleşik grafikte komutu yapan cevap başına maliyet yoktur, yalnız tabloda vardır.
+4. Elle yazılan (kaynak=insan) soru sayısı 77'dir, toplam 103 sorunun geri kalanı yapay zekâ yazımı ya da onaysız okumadır. Kaan 26 Kasım 2026'da 77'yi yeterli saydı.
