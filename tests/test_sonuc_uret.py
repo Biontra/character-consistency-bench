@@ -267,9 +267,12 @@ class Betik(unittest.TestCase):
             yt = (Path(t) / "o" / "grafik_yapti_tuttu.svg").read_text(encoding="utf-8")
             tek = (Path(t) / "o" / "grafik_dogruluk_maliyet.svg").read_text(encoding="utf-8")
             for svg in (yt, tek):
-                self.assertIn("66.7 (2/3)", svg)
-                self.assertIn("77.8 (7/9)", svg)
-                self.assertIn("75.0 (3/4)", svg)
+                self.assertIn(">66.7</text>", svg)
+                self.assertIn(">(2/3)</text>", svg)
+                self.assertIn(">77.8</text>", svg)
+                self.assertIn(">(7/9)</text>", svg)
+                self.assertIn(">75.0</text>", svg)
+                self.assertIn(">(3/4)</text>", svg)
                 self.assertIn(">100.0<", svg)
 
     def test_girdi_butunlugu_uretim_kaydi_ve_kredi_hatalari(self):

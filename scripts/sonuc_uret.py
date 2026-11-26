@@ -250,6 +250,20 @@ def md_yaz(sonuc, uyum):
     return "\n".join(p) + "\n"
 
 
+def _cubuk_ustu(cx, tepe, deger, pp):
+    """Çubuğun üstündeki yazı: üstte değer, altında küçük puntoyla (pay/payda).
+
+    İki satır olduğu için yan yana duran çubukların yazıları birbirine binmez.
+    """
+    if not pp:
+        return (f'<text x="{cx:.1f}" y="{tepe - 4:.1f}" text-anchor="middle" '
+                f'font-size="9" fill="#111111">{escape(deger)}</text>')
+    return (f'<text x="{cx:.1f}" y="{tepe - 14:.1f}" text-anchor="middle" '
+            f'font-size="9" fill="#111111">{escape(deger)}</text>'
+            f'<text x="{cx:.1f}" y="{tepe - 4:.1f}" text-anchor="middle" '
+            f'font-size="7.5" fill="#444444">({escape(pp)})</text>')
+
+
 def _etiket_araligi(modeller, min_grup=160):
     en_uzun = max((len(str(m)) for m in modeller), default=1)
     return max(min_grup, int(en_uzun * 7.5) + 24)
@@ -292,9 +306,7 @@ def svg_cubuk(baslik, seriler, modeller, deger_ust, birim, format_):
                 continue
             h = alan_y * min(d, deger_ust) / deger_ust
             o.append(f'<rect x="{x:.1f}" y="{ust + alan_y - h:.1f}" width="{cubuk_g - 2:.1f}" height="{h:.1f}" fill="{renk}"/>')
-            ust_yazi = f"{format_(d)} ({pp})" if pp else format_(d)
-            o.append(f'<text x="{cx:.1f}" y="{ust + alan_y - h - 4:.1f}" text-anchor="middle" '
-                     f'font-size="9" fill="#111111">{escape(ust_yazi)}</text>')
+            o.append(_cubuk_ustu(cx, ust + alan_y - h, format_(d), pp))
         mx = sol + grup_g * (gi + 0.5)
         my = ust + alan_y + 18
         o.append(f'<text x="{mx:.1f}" y="{my:.1f}" text-anchor="end" font-size="11" '
@@ -358,9 +370,7 @@ def svg_tek_grafik(sonuc):
                 h = alan_y * min(d, ust_deger) / ust_deger
                 o.append(f'<rect x="{x:.1f}" y="{ust + alan_y - h:.1f}" width="{cubuk_g - 2:.1f}" '
                          f'height="{h:.1f}" fill="{renk}"/>')
-                ust_yazi = f"{format_(d)} ({pp})" if pp else format_(d)
-                o.append(f'<text x="{cx:.1f}" y="{ust + alan_y - h - 4:.1f}" '
-                         f'text-anchor="middle" font-size="9" fill="#111111">{escape(ust_yazi)}</text>')
+                o.append(_cubuk_ustu(cx, ust + alan_y - h, format_(d), pp))
             mx = sol + grup_g * (gi + 0.5)
             my = ust + alan_y + 18
             o.append(f'<text x="{mx:.1f}" y="{my:.1f}" text-anchor="end" font-size="11" '
