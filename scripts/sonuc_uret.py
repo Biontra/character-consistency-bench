@@ -1,4 +1,4 @@
-"""Sonuç tablosunu üretir: results.json, sonuclar.csv, RESULTS.md ve iki SVG grafik. Yalnız stdlib.
+"""Sonuç tablosunu üretir: results.json, sonuclar.csv, RESULTS.md ve üç SVG grafik. Yalnız stdlib.
 
 Kullanım: python3 scripts/sonuc_uret.py --checks secret/checks.json
           --hakem-ham results/judge_raw.jsonl --uretim-kaydi uretim_kaydi
@@ -103,7 +103,7 @@ def uyum_bolumu(uyum):
         satirlar = [
             f"Ana sayı: %{ana['uyum'] * 100:.1f} ({ana['uyusan']}/{ana['birim']} birim uyuştu). "
             f"Eşik %{ESIK * 100:.0f}: {'geçti' if ana['esik_gecti'] else 'geçmedi'}. "
-            f"İnsan 20 klibi puanladı.",
+            f"İnsan {uyum['klip_sayisi']} klibi puanladı.",
             "",
             "Yan sayılar (eşikle karşılaştırılmaz):",
             f"- Tümü hakem_yok olan klipler çıkarılınca: %{a['uyum'] * 100:.1f} "
@@ -164,6 +164,8 @@ def md_yaz(sonuc, uyum):
     p.append("\n## Grafikler\n")
     p.append("- `grafik_yapti_tuttu.svg`: model başına komutu yaptı ve karakteri tuttu %.")
     p.append("- `grafik_maliyet.svg`: model başına kredi, komutu yapan ve karakteri tutan cevap başına.")
+    p.append("- `grafik_dogruluk_maliyet.svg`: tek resimde, solda komutu yaptı % ve karakteri tuttu % "
+             "(ayrı çubuklar, toplanmadı), sağda ayrı eksenle tutulan karakter cevabı başına kredi.")
     return "\n".join(p) + "\n"
 
 
@@ -207,6 +209,70 @@ def svg_cubuk(baslik, seriler, modeller, deger_ust, birim, format_):
     return "\n".join(o) + "\n"
 
 
+def svg_tek_grafik(sonuc):
+    """Tek resim, iki panel. Sol: komutu yaptı % ve karakteri tuttu % (ayrı çubuk, toplanmaz).
+    Sağ: tutulan karakter cevabı başına kredi (ayrı eksen). Düz, gölgesiz."""
+    ms = sonuc["modeller"]
+    gen, yuk, ust, alt = 960, 380, 70, 70
+    alan_y = yuk - ust - alt
+    renk_y, renk_t, renk_k = "#3b6ea5", "#c2703d", "#5b8c5a"
+    o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{gen}" height="{yuk}" viewBox="0 0 {gen} {yuk}" '
+         'font-family="sans-serif" font-size="12">',
+         f'<rect width="{gen}" height="{yuk}" fill="#ffffff"/>',
+         '<text x="56" y="24" font-size="14" fill="#111111">'
+         'Komutu yaptı ve karakteri tuttu (iki ayrı ölçü) ve tutulan karakter cevabı başına kredi</text>']
+
+    def eksen(sol, sag, ust_deger, birim, format_):
+        for i in range(6):
+            y = ust + alan_y - alan_y * i / 5
+            o.append(f'<line x1="{sol}" y1="{y:.1f}" x2="{sag}" y2="{y:.1f}" stroke="#dddddd"/>')
+            o.append(f'<text x="{sol - 6}" y="{y + 4:.1f}" text-anchor="end" fill="#444444">'
+                     f'{escape(format_(ust_deger * i / 5))}</text>')
+        o.append(f'<text x="{sol - 6}" y="{ust - 14}" text-anchor="end" fill="#444444">{escape(birim)}</text>')
+
+    def cubuklar(sol, sag, ust_deger, seriler, format_):
+        grup_g = (sag - sol) / len(ms)
+        cubuk_g = min(34, grup_g * 0.8 / len(seriler))
+        for gi, m in enumerate(ms):
+            gx = sol + grup_g * gi + (grup_g - cubuk_g * len(seriler)) / 2
+            for si, (renk, degerler) in enumerate(seriler):
+                d, x = degerler[gi], gx + cubuk_g * si
+                if d is None:
+                    o.append(f'<text x="{x + cubuk_g / 2:.1f}" y="{ust + alan_y - 6}" text-anchor="middle" '
+                             f'font-size="10" fill="#444444" transform="rotate(-90 {x + cubuk_g / 2:.1f} '
+                             f'{ust + alan_y - 6})">ölçülemedi</text>')
+                    continue
+                h = alan_y * min(d, ust_deger) / ust_deger
+                o.append(f'<rect x="{x:.1f}" y="{ust + alan_y - h:.1f}" width="{cubuk_g - 2:.1f}" '
+                         f'height="{h:.1f}" fill="{renk}"/>')
+                o.append(f'<text x="{x + cubuk_g / 2 - 1:.1f}" y="{ust + alan_y - h - 4:.1f}" '
+                         f'text-anchor="middle" font-size="10" fill="#111111">{escape(format_(d))}</text>')
+            o.append(f'<text x="{sol + grup_g * (gi + 0.5):.1f}" y="{ust + alan_y + 18}" '
+                     f'text-anchor="middle" fill="#111111">{escape(m["ad"])}</text>')
+
+    # Sol panel: yüzde ekseni 0-100
+    sol1, sag1 = 56, 470
+    o.append(f'<text x="{sol1}" y="{ust - 30}" fill="#111111">Doğru cevap oranı (yüzde)</text>')
+    eksen(sol1, sag1, 100, "%", lambda v: f"{v:.0f}")
+    cubuklar(sol1, sag1, 100, [(renk_y, [m["yapti"]["yuzde"] for m in ms]),
+                               (renk_t, [m["tuttu"]["yuzde"] for m in ms])], lambda v: f"{v:.0f}")
+    # Sağ panel: kredi ekseni, ayrı ölçek
+    kredi = [m["kredi"]["tutan_cevap_basina"] for m in ms]
+    ust2 = ust_sinir(kredi)
+    sol2, sag2 = 540, 940
+    o.append(f'<text x="{sol2}" y="{ust - 30}" fill="#111111">Maliyet (ayrı eksen)</text>')
+    eksen(sol2, sag2, ust2, "kredi", sayi)
+    cubuklar(sol2, sag2, ust2, [(renk_k, kredi)], sayi)
+    o.append(f'<line x1="{(sag1 + sol2) / 2:.1f}" y1="{ust - 30}" x2="{(sag1 + sol2) / 2:.1f}" '
+             f'y2="{ust + alan_y + 24}" stroke="#bbbbbb"/>')
+    for x, renk, ad in ((sol1, renk_y, "Komutu yaptı (%)"), (sol1 + 160, renk_t, "Karakteri tuttu (%)"),
+                        (sol2, renk_k, "Tutulan karakter cevabı başına kredi")):
+        o.append(f'<rect x="{x}" y="{yuk - 26}" width="12" height="12" fill="{renk}"/>')
+        o.append(f'<text x="{x + 18}" y="{yuk - 16}" fill="#111111">{escape(ad)}</text>')
+    o.append("</svg>")
+    return "\n".join(o) + "\n"
+
+
 def ust_sinir(degerler):
     """Eksen üst sınırı: 1, 2, 5 x 10^n basamaklarından değerleri sığdıran en küçüğü."""
     en_buyuk = max([d for d in degerler if d is not None] or [1])
@@ -231,7 +297,7 @@ def svg_yazilar(sonuc):
                     [("Komutu yapan cevap başına", "#3b6ea5", yapan),
                      ("Tutulan karakter cevabı başına", "#c2703d", tutan)],
                     adlar, ust_sinir(yapan + tutan), "kredi", sayi)
-    return yt, mal
+    return yt, mal, svg_tek_grafik(sonuc)
 
 
 def main(argv=None):
@@ -248,7 +314,7 @@ def main(argv=None):
         sonuc = hesapla(oku(a.checks), satirlar, uretilemeyenleri_oku(a.uretim_kaydi),
                         oku(a.modeller)["modeller"])
         md = md_yaz(sonuc, uyum)
-        yt, mal = svg_yazilar(sonuc)
+        yt, mal, tek = svg_yazilar(sonuc)
     except (ValueError, OSError, KeyError, TypeError) as hata:
         print(f"Sonuc uretilemedi: {hata}", file=sys.stderr)
         return 2
@@ -261,6 +327,7 @@ def main(argv=None):
     (cikti / "RESULTS.md").write_text(md, encoding="utf-8")
     (cikti / "grafik_yapti_tuttu.svg").write_text(yt, encoding="utf-8")
     (cikti / "grafik_maliyet.svg").write_text(mal, encoding="utf-8")
+    (cikti / "grafik_dogruluk_maliyet.svg").write_text(tek, encoding="utf-8")
     print(f"Yazildi: {cikti}")
     return 0
 

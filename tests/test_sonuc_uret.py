@@ -42,7 +42,8 @@ class Betik(unittest.TestCase):
             r1 = calistir(t, Path(t) / "o1")
             r2 = calistir(t, Path(t) / "o2")
             self.assertEqual((r1.returncode, r2.returncode), (0, 0), r1.stderr)
-            adlar = ["RESULTS.md", "grafik_maliyet.svg", "grafik_yapti_tuttu.svg",
+            adlar = ["RESULTS.md", "grafik_dogruluk_maliyet.svg", "grafik_maliyet.svg",
+                     "grafik_yapti_tuttu.svg",
                      "results.json", "sonuclar.csv"]
             self.assertEqual(sorted(p.name for p in (Path(t) / "o1").iterdir()), adlar)
             for ad in adlar:
@@ -63,7 +64,7 @@ class Betik(unittest.TestCase):
                 self.assertNotIn("uydurma", p.read_text(encoding="utf-8"), p.name)
 
     def test_uyum_raporu_eklenir(self):
-        rapor = {"ana": {"uyum": 0.9, "uyusan": 18, "birim": 20, "esik_gecti": True},
+        rapor = {"klip_sayisi": 20, "ana": {"uyum": 0.9, "uyusan": 18, "birim": 20, "esik_gecti": True},
                  "yan_sayilar": {
                      "tumu_hakem_yok_klipler_cikarilinca": {"uyum": 0.95, "uyusan": 19, "birim": 20, "cikarilan_klip": 1},
                      "hakem_yok_birimler_cikarilinca": {"uyum": 0.8, "uyusan": 8, "birim": 10, "cikarilan_birim": 3}}}
@@ -74,9 +75,51 @@ class Betik(unittest.TestCase):
             self.assertEqual(r.returncode, 0, r.stderr)
             md = (Path(t) / "o" / "RESULTS.md").read_text(encoding="utf-8")
             self.assertIn("Ana sayı: %90.0 (18/20 birim uyuştu). Eşik %85: geçti.", md)
+            self.assertIn("İnsan 20 klibi puanladı.", md)
             self.assertIn("%95.0 (19/20), çıkarılan klip 1", md)
             self.assertIn("%80.0 (8/10), çıkarılan birim 3", md)
             self.assertNotIn("henüz yapılmadı", md)
+
+    def test_klip_sayisi_rapordan_okunur(self):
+        rapor = {"klip_sayisi": 7, "ana": {"uyum": 0.9, "uyusan": 18, "birim": 20, "esik_gecti": True},
+                 "yan_sayilar": {
+                     "tumu_hakem_yok_klipler_cikarilinca": {"uyum": 0.95, "uyusan": 19, "birim": 20, "cikarilan_klip": 1},
+                     "hakem_yok_birimler_cikarilinca": {"uyum": 0.8, "uyusan": 8, "birim": 10, "cikarilan_birim": 3}}}
+        with tempfile.TemporaryDirectory() as t:
+            yaz_dunya(t)
+            (Path(t) / "uyum.json").write_text(json.dumps(rapor), encoding="utf-8")
+            r = calistir(t, Path(t) / "o", Path(t) / "uyum.json")
+            self.assertEqual(r.returncode, 0, r.stderr)
+            md = (Path(t) / "o" / "RESULTS.md").read_text(encoding="utf-8")
+            self.assertIn("İnsan 7 klibi puanladı.", md)
+            self.assertNotIn("20 klibi", md)
+
+    def test_klip_sayisi_yoksa_hata(self):
+        rapor = {"ana": {"uyum": 0.9, "uyusan": 18, "birim": 20, "esik_gecti": True},
+                 "yan_sayilar": {
+                     "tumu_hakem_yok_klipler_cikarilinca": {"uyum": 0.95, "uyusan": 19, "birim": 20, "cikarilan_klip": 1},
+                     "hakem_yok_birimler_cikarilinca": {"uyum": 0.8, "uyusan": 8, "birim": 10, "cikarilan_birim": 3}}}
+        with tempfile.TemporaryDirectory() as t:
+            yaz_dunya(t)
+            (Path(t) / "uyum.json").write_text(json.dumps(rapor), encoding="utf-8")
+            r = calistir(t, Path(t) / "o", Path(t) / "uyum.json")
+            self.assertEqual(r.returncode, 2)
+
+    def test_tek_grafik_gecerli_xml_ve_etiketler(self):
+        import xml.etree.ElementTree as ET
+        with tempfile.TemporaryDirectory() as t:
+            yaz_dunya(t)
+            r = calistir(t, Path(t) / "o")
+            self.assertEqual(r.returncode, 0, r.stderr)
+            yol = Path(t) / "o" / "grafik_dogruluk_maliyet.svg"
+            ET.fromstring(yol.read_text(encoding="utf-8"))
+            metin = yol.read_text(encoding="utf-8")
+            for m in MODELLER:
+                self.assertIn(m["ad"], metin)
+            for etiket in ("Komutu yaptı (%)", "Karakteri tuttu (%)",
+                           "Tutulan karakter cevabı başına kredi"):
+                self.assertIn(etiket, metin)
+            self.assertNotIn("Doğruluk (%)", metin)
 
     def test_bozuk_uyum_raporu_hata(self):
         with tempfile.TemporaryDirectory() as t:
