@@ -360,3 +360,9 @@ Sınırlar (kodla çözülmedi, sonuç okunurken bilinmeli):
 3. **Uyum.** Ana sayı %80,2 (275/343). Önceden yazılan eşik %85: GEÇMEDİ. Kural gereği sonuç olduğu gibi yayınlanır. Yan sayılar (eşikle karşılaştırılmaz): tümü hakem_yok olan 2 klip çıkarılınca %90,2 (275/305); hakem_yok birimler çıkarılınca %90,5 (275/304); yalnız evet/hayır birimlerinde %91,6 (297 birim). Ana sayının düşüklüğünün büyük kısmı hakemin cevap vermediği 39 birimden gelir (hepsi uyuşmazlık sayılır). Cevap verilen birimlerde en büyük uyuşmazlık: insanın "hayır" dediği 18 yerde hakem "evet" demiş.
 4. **Ne anlama gelir.** Eşik geçilmediği için model sıralaması kesin sonuç olarak sunulmaz; tablo "tek hakemin, insanla %80,2 uyuşan okuması" olarak okunmalıdır.
 5. **Sonuç kodu ilk kez gerçek veriyle çalıştı.** Bu çalıştırmada grafiklerde çubuk üstü yazıların birbirine bindiği görüldü; yazı iki satıra bölündü (üstte değer, altta pay/payda). Yalnız görünüm değişti, hiçbir sayı değişmedi. Grafikler bu kez gözle kontrol edildi.
+
+## İnsan puanlamasına ekler (26 Kasım 2026, Kaan'ın cevapları)
+
+1. **Videoları önceden izleme.** Kaan puanlamadan önce 98 videonun yaklaşık 60-70'ini izlemişti (kendi sözü: "bi 60-70 tane izledim"). Yani puanladığı 20 klibin çoğunu büyük olasılıkla daha önce video olarak görmüştü; hangilerini gördüğü kayıtlı değil. Hakem ise yalnız kareleri gördü. Bu, insan cevaplarının karelerde görünmeyen bilgiden (hareket, ses) etkilenmiş olabileceği anlamına gelir ve bir sınırdır. Puanlama sırasında Kaan'a yalnız karelerde gördüğüne göre cevap vermesi söylenmişti.
+2. **Disk olayı sırasında kör cevap.** Kaan, kareler görünmezken cevapladığı soru kalmadığını söyledi ("yok"). Bu onun beyanıdır, ayrıca doğrulanmadı.
+3. **İkinci bağımsız kontrol.** Sonuç çıktıları için ikinci bir bağımsız kontrol yapılmadı; Kaan gerekli görmedi.
