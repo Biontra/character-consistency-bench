@@ -27,8 +27,28 @@ def _klip_sorulari(checks, esleme):
     return kayit
 
 
-def cevir(checks, esleme, insan_dosya, hakem_satirlari):
-    """Döndürür: (insan, hakem, sorular) = uyum_raporu girdileri."""
+def secim_klipleri(secim, esleme):
+    """data/insan_secimi.json + esleme -> K kodu kümesi. Eşlenemeyen ya da tekrar eden çift hata."""
+    kod = {(r["model"], r["komut"]): r["klip"] for r in esleme}
+    try:
+        ciftler = [(c["model"], c["komut"]) for c in secim["secim"]]
+    except (KeyError, TypeError):
+        raise GirdiHatasi("secim dosyasi bicimi gecersiz")
+    kodlar = []
+    for c in ciftler:
+        if c not in kod:
+            raise GirdiHatasi("secimdeki bir klip esleme dosyasinda yok")
+        kodlar.append(kod[c])
+    if not kodlar or len(set(kodlar)) != len(kodlar):
+        raise GirdiHatasi("secimde klip yok ya da ayni klip birden fazla kez var")
+    return set(kodlar)
+
+
+def cevir(checks, esleme, insan_dosya, hakem_satirlari, secim):
+    """Döndürür: (insan, hakem, sorular) = uyum_raporu girdileri.
+
+    insan dosyasındaki klip kümesi, secim + esleme'den çıkan K kodu kümesiyle BİREBİR aynı olmalı.
+    """
     if not isinstance(insan_dosya, dict) or insan_dosya.get("bitti") is not True:
         raise GirdiHatasi("insan dosyasi bitmemis (bitti true degil)")
     cevaplar = insan_dosya.get("cevaplar")
@@ -38,6 +58,11 @@ def cevir(checks, esleme, insan_dosya, hakem_satirlari):
     for klip in cevaplar:
         if klip not in tum:
             raise GirdiHatasi(f"insan dosyasinda bilinmeyen klip: {klip}")
+    beklenen_klipler = secim_klipleri(secim, esleme)
+    if set(cevaplar) != beklenen_klipler:
+        eksik = sorted(beklenen_klipler - set(cevaplar))
+        fazla = sorted(set(cevaplar) - beklenen_klipler)
+        raise GirdiHatasi(f"insan dosyasindaki klipler secimle ayni degil (eksik: {eksik}, secimde olmayan: {fazla})")
     hakem_hepsi = {}
     for s in hakem_satirlari:
         klip, soru, cevap = s.get("klip"), s.get("soru"), s.get("cevap")
@@ -72,9 +97,9 @@ def _ozet(r):
     return {"uyum": r["uyum"], "uyusan": r["uyusan"], "birim": r["birim"]}
 
 
-def hesapla(checks, esleme, insan_dosya, hakem_satirlari):
+def hesapla(checks, esleme, insan_dosya, hakem_satirlari, secim):
     """Ana sayı (uyum_raporu aynen), iki yan sayı (eşiksiz) ve ek sayılar."""
-    insan, hakem, sorular = cevir(checks, esleme, insan_dosya, hakem_satirlari)
+    insan, hakem, sorular = cevir(checks, esleme, insan_dosya, hakem_satirlari, secim)
     ana = uyum_raporu(insan, hakem, sorular)
 
     tumu = sorted(k for k in insan if all(v == "hakem_yok" for v in hakem[k].values()))

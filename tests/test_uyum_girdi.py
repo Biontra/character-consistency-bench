@@ -1,4 +1,5 @@
 """Uyum girdi çeviricisi testleri. Yalnız UYDURMA veri."""
+import hashlib
 import json
 import subprocess
 import sys
@@ -25,6 +26,13 @@ ESLEME = [{"klip": "K001", "model": "m1", "komut": 1},
           {"klip": "K004", "model": "m2", "komut": 1}]
 
 
+def secim_of(i):
+    """Uydurma secim dosyasi: insan dosyasindaki (eslemede olan) klipler. Eski testlerin kurulumu."""
+    kod = {r["klip"]: r for r in ESLEME}
+    return {"tohum": 1, "secim": [{"model": kod[k]["model"], "komut": kod[k]["komut"]}
+                                  for k in sorted(i["cevaplar"]) if k in kod]}
+
+
 def insan(**klipler):
     return {"bitti": True, "bitis": "t", "cevaplar": klipler}
 
@@ -39,7 +47,7 @@ class CeviriTest(unittest.TestCase):
         i = insan(K001={"a": "evet", "b": "hayir", "d": "gorunmuyor"})
         h = satirlar(K001={"a": "evet", "b": "evet", "d": "hakem_yok"},
                      K004={"a": "evet", "b": "evet", "d": "evet"})  # K004 insanda yok
-        ins, hak, sor = ug.cevir(CHECKS, ESLEME, i, h)
+        ins, hak, sor = ug.cevir(CHECKS, ESLEME, i, h, secim_of(i))
         self.assertEqual(ins, {"K001": {"a": "evet", "b": "hayir", "d": "gorunmuyor"}})
         self.assertEqual(hak, {"K001": {"a": "evet", "b": "evet", "d": "hakem_yok"}})
         self.assertEqual([s["id"] for s in sor["K001"]], ["a", "b", "d"])
@@ -50,12 +58,12 @@ class CeviriTest(unittest.TestCase):
     def test_puansiz_soru_dahil(self):
         i = insan(K002={"a": "evet", "b": "evet", "c": "hayir", "d": "evet"})
         h = satirlar(K002={"a": "evet", "b": "evet", "c": "evet", "d": "evet"})
-        ins, hak, sor = ug.cevir(CHECKS, ESLEME, i, h)
+        ins, hak, sor = ug.cevir(CHECKS, ESLEME, i, h, secim_of(i))
         self.assertEqual(uyum_raporu(ins, hak, sor)["dislanan_puansiz"], 1)
 
     def hata(self, i, h):
         with self.assertRaises(ug.GirdiHatasi):
-            ug.cevir(CHECKS, ESLEME, i, h)
+            ug.cevir(CHECKS, ESLEME, i, h, secim_of(i))
 
     TAM = {"a": "evet", "b": "evet", "d": "evet"}
 
@@ -88,9 +96,47 @@ class CeviriTest(unittest.TestCase):
         self.hata(insan(), satirlar(K001=self.TAM))
 
 
+class KlipKumesiTest(unittest.TestCase):
+    TAM = {"a": "evet", "b": "evet", "d": "evet"}
+
+    def hata(self, i, secim):
+        h = satirlar(K001=self.TAM, K004=self.TAM)
+        with self.assertRaises(ug.GirdiHatasi):
+            ug.cevir(CHECKS, ESLEME, i, h, secim)
+
+    def secim(self, *kodlar):
+        kod = {r["klip"]: r for r in ESLEME}
+        return {"tohum": 1, "secim": [{"model": kod[k]["model"], "komut": kod[k]["komut"]}
+                                      for k in kodlar]}
+
+    def test_ayni_kume_gecer(self):
+        i = insan(K001=dict(self.TAM), K004=dict(self.TAM))
+        ins, _, _ = ug.cevir(CHECKS, ESLEME, i, satirlar(K001=self.TAM, K004=self.TAM),
+                             self.secim("K004", "K001"))
+        self.assertEqual(sorted(ins), ["K001", "K004"])
+
+    def test_eksik_klip(self):
+        self.hata(insan(K001=dict(self.TAM)), self.secim("K001", "K004"))
+
+    def test_fazla_klip(self):
+        self.hata(insan(K001=dict(self.TAM), K004=dict(self.TAM)), self.secim("K001"))
+
+    def test_secimde_olmayan_klip(self):
+        self.hata(insan(K001=dict(self.TAM), K004=dict(self.TAM)), self.secim("K001", "K002"))
+
+    def test_secimde_eslemesiz_cift(self):
+        s = self.secim("K001", "K004")
+        s["secim"][1] = {"model": "yok", "komut": 7}
+        self.hata(insan(K001=dict(self.TAM), K004=dict(self.TAM)), s)
+
+    def test_secimde_ayni_klip_iki_kez(self):
+        s = self.secim("K001", "K001")
+        self.hata(insan(K001=dict(self.TAM)), s)
+
+
 class YanSayiTest(unittest.TestCase):
     def rapor(self, i, h):
-        return ug.hesapla(CHECKS, ESLEME, i, h)
+        return ug.hesapla(CHECKS, ESLEME, i, h, secim_of(i))
 
     def test_ana_sayi_aynen_ve_yan_sayilar(self):
         i = insan(K001={"a": "evet", "b": "hayir", "d": "gorunmuyor"},
@@ -101,7 +147,7 @@ class YanSayiTest(unittest.TestCase):
             K003={"a": "hakem_yok", "b": "hakem_yok", "c": "hakem_yok", "d": "hakem_yok"},  # tumu
             K004={"a": "evet", "b": "hayir", "d": "evet"})
         r = self.rapor(i, h)
-        ins, hak, sor = ug.cevir(CHECKS, ESLEME, i, h)
+        ins, hak, sor = ug.cevir(CHECKS, ESLEME, i, h, secim_of(i))
         self.assertEqual(r["ana"], uyum_raporu(ins, hak, sor))
         self.assertEqual(r["ana"]["birim"], 9)
         self.assertEqual(r["ana"]["uyusan"], 3)  # K001 b, K004 a ve d
@@ -144,28 +190,81 @@ class YanSayiTest(unittest.TestCase):
 
 
 class BetikTest(unittest.TestCase):
-    def test_betik_uydurma_dosyalarla(self):
+    def kur(self, i=None, sha="dogru"):
         d = Path(tempfile.mkdtemp())
         (d / "checks.json").write_text(json.dumps(CHECKS))
         (d / "esleme.json").write_text(json.dumps(ESLEME))
-        i = insan(K001={"a": "evet", "b": "hayir", "d": "evet"})
+        i = i or insan(K001={"a": "evet", "b": "hayir", "d": "evet"})
         h = satirlar(K001={"a": "evet", "b": "evet", "d": "evet"})
+        (d / "secim.json").write_text(json.dumps(secim_of(i)))
         (d / "insan.json").write_text(json.dumps(i))
         (d / "ham.jsonl").write_text("\n".join(json.dumps(x) for x in h) + "\n")
+        if sha == "dogru":
+            (d / "cevaplar.sha256").write_text(
+                hashlib.sha256((d / "insan.json").read_bytes()).hexdigest() + "  insan.json\n")
+        elif sha == "yanlis":
+            (d / "cevaplar.sha256").write_text("0" * 64 + "  insan.json\n")
         arg = [sys.executable, str(DEPO / "scripts" / "uyum_hesapla.py"),
                "--insan", str(d / "insan.json"), "--hakem-ham", str(d / "ham.jsonl"),
-               "--checks", str(d / "checks.json"), "--esleme", str(d / "esleme.json")]
+               "--checks", str(d / "checks.json"), "--esleme", str(d / "esleme.json"),
+               "--secim", str(d / "secim.json")]
+        return d, arg
+
+    def test_betik_uydurma_dosyalarla(self):
+        d, arg = self.kur()
         p = subprocess.run(arg, capture_output=True, text=True)
         self.assertEqual(p.returncode, 0, p.stderr)
         r = json.loads(p.stdout)
         self.assertEqual(r["ana"]["birim"], 3)
         self.assertEqual(r["ana"]["uyusan"], 2)
+        i = json.loads((d / "insan.json").read_text())
         i["bitti"] = False
         (d / "insan.json").write_text(json.dumps(i))
+        (d / "cevaplar.sha256").write_text(
+            hashlib.sha256((d / "insan.json").read_bytes()).hexdigest() + "  insan.json\n")
         p = subprocess.run(arg, capture_output=True, text=True)
         self.assertNotEqual(p.returncode, 0)
         self.assertEqual(p.stdout, "")
         self.assertIn("bitmemis", p.stderr)
+
+    def test_sha_dosyasi_yoksa_calismaz(self):
+        d, arg = self.kur(sha="yok")
+        p = subprocess.run(arg, capture_output=True, text=True)
+        self.assertNotEqual(p.returncode, 0)
+        self.assertEqual(p.stdout, "")
+        self.assertIn("sha256", p.stderr)
+
+    def test_sha_uyusmazsa_calismaz(self):
+        d, arg = self.kur(sha="yanlis")
+        p = subprocess.run(arg, capture_output=True, text=True)
+        self.assertNotEqual(p.returncode, 0)
+        self.assertEqual(p.stdout, "")
+        self.assertIn("sha256", p.stderr)
+
+    def test_dosya_sha_sonrasi_degisirse_calismaz(self):
+        d, arg = self.kur()
+        i = json.loads((d / "insan.json").read_text())
+        i["cevaplar"]["K001"]["a"] = "hayir"
+        (d / "insan.json").write_text(json.dumps(i))
+        p = subprocess.run(arg, capture_output=True, text=True)
+        self.assertNotEqual(p.returncode, 0)
+        self.assertEqual(p.stdout, "")
+
+    def test_secim_argumani_zorunlu(self):
+        d, arg = self.kur()
+        k = arg.index("--secim")
+        p = subprocess.run(arg[:k] + arg[k + 2:], capture_output=True, text=True)
+        self.assertNotEqual(p.returncode, 0)
+        self.assertEqual(p.stdout, "")
+
+    def test_betik_klip_kumesi_uyusmazsa_calismaz(self):
+        d, arg = self.kur()
+        kod = {r["klip"]: r for r in ESLEME}
+        (d / "secim.json").write_text(json.dumps({"tohum": 1, "secim": [
+            {"model": kod[k]["model"], "komut": kod[k]["komut"]} for k in ("K001", "K004")]}))
+        p = subprocess.run(arg, capture_output=True, text=True)
+        self.assertNotEqual(p.returncode, 0)
+        self.assertEqual(p.stdout, "")
 
 
 if __name__ == "__main__":

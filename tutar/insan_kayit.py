@@ -56,17 +56,47 @@ def _kare_adlari(kok, klip) -> list:
     return adlar
 
 
+def _sorular_txt_ayristir(icerik):
+    """hakem_hazirla ciktisi: "Sorular:" satirindan sonraki ilk bos satira kadar "kimlik: metin"
+    satirlari; komut metni, "Sorular:" satirindan onceki bos olmayan satirlarin sonundaki blok.
+
+    Dondurur: (komut_satirlari_oncesi: list, {kimlik: metin}).
+    """
+    satirlar = icerik.split("\n")
+    idx = [i for i, l in enumerate(satirlar) if l == "Sorular:"]
+    if len(idx) != 1:
+        raise AracHatasi("sorular dosyasinda tek bir 'Sorular:' satiri olmali")
+    sorular = {}
+    for l in satirlar[idx[0] + 1:]:
+        if l == "":
+            break
+        kimlik, ayrac, metin = l.partition(": ")
+        if not ayrac or not kimlik or kimlik in sorular:
+            raise AracHatasi("sorular dosyasinda gecersiz ya da tekrar eden soru satiri")
+        sorular[kimlik] = metin
+    oncesi = satirlar[:idx[0]]
+    while oncesi and oncesi[-1] == "":
+        oncesi.pop()
+    return oncesi, sorular
+
+
 def _metin_denetimi(kok, klip, komut_en, sorular):
-    """Gösterilen metin, hakemin gördüğü dosyayla (sorular.txt) birebir örtüşmeli."""
+    """Gösterilen metin, hakemin gördüğü dosyayla (sorular.txt) TAM eşleşmeli:
+    soru kimlikleri kümesi ve her metin birebir; komut satırları tam satır."""
     yol = Path(kok) / "hakem_girdi" / klip / "sorular.txt"
     if not yol.is_file():
         raise AracHatasi(f"{klip}: hakemin soru dosyasi yok, metin karsilastirilamadi")
-    icerik = yol.read_text(encoding="utf-8")
-    if komut_en not in icerik:
+    oncesi, hakem_sorulari = _sorular_txt_ayristir(yol.read_text(encoding="utf-8"))
+    komut_satirlari = komut_en.split("\n")
+    if oncesi[len(oncesi) - len(komut_satirlari):] != komut_satirlari or \
+            len(oncesi) < len(komut_satirlari):
         raise AracHatasi(f"{klip}: komut metni hakemin gordugunden farkli")
-    for s in sorular:
-        if f"{s['id']}: {s['metin']}" not in icerik:
-            raise AracHatasi(f"{klip}: soru metni hakemin gordugunden farkli ({s['id']})")
+    arac = {s["id"]: s["metin"] for s in sorular}
+    if set(arac) != set(hakem_sorulari):
+        raise AracHatasi(f"{klip}: soru kimlikleri hakemin gordugunden farkli")
+    for kimlik, metin in arac.items():
+        if hakem_sorulari[kimlik] != metin:
+            raise AracHatasi(f"{klip}: soru metni hakemin gordugunden farkli ({kimlik})")
 
 
 def klip_sorulari(checks, komutlar, komut):
@@ -139,8 +169,9 @@ class CevapDeposu:
             veri = json.loads(self.yol.read_text(encoding="utf-8"))
             cevaplar = veri["cevaplar"]
             bitti = veri["bitti"]
-        except (ValueError, KeyError, TypeError) as hata:
-            raise AracHatasi(f"cevap dosyasi okunamadi: {hata}")
+        except (ValueError, KeyError, TypeError):
+            raise AracHatasi(f"Cevap dosyasi bozuk ya da okunamiyor: {self.yol}. "
+                             "Dosyaya elle dokunma; once bir yedegini al.")
         if not isinstance(cevaplar, dict) or not isinstance(bitti, bool):
             raise AracHatasi("cevap dosyasi bicimi gecersiz")
         for klip, c in cevaplar.items():
@@ -155,10 +186,14 @@ class CevapDeposu:
         if bitti:
             if not self.bitis:
                 raise AracHatasi("bitti dosyasinda bitis zamani yok")
+            yapilan, toplam = self.ilerleme()
+            if yapilan != toplam:
+                raise AracHatasi(f"bitti dosyasinda tum sorular cevapli degil ({yapilan}/{toplam})")
             ozet = hashlib.sha256(self.yol.read_bytes()).hexdigest()
             if not self.sha_yolu.exists():
-                self._yaz_sha(ozet)  # bitir ile sha yazimi arasinda kesilmis olabilir
-            elif self.sha_yolu.read_text().split()[:1] != [ozet]:
+                raise AracHatasi("bitti dosyasinin sha256 dosyasi yok; sessizce yeniden uretilmez: "
+                                 + str(self.sha_yolu))
+            if self.sha_yolu.read_text().split()[:1] != [ozet]:
                 raise AracHatasi("cevap dosyasi bitirildikten sonra degismis (sha256 uyusmuyor)")
 
     def _atomik(self, yol, metin):
@@ -178,10 +213,13 @@ class CevapDeposu:
     def _yaz_sha(self, ozet):
         self._atomik(self.sha_yolu, f"{ozet}  {self.yol.name}\n")
 
-    def _yaz(self):
+    def _metin(self):
         veri = {"surum": SURUM, "bitti": self.bitti, "bitis": self.bitis,
                 "cevaplar": self.cevaplar}
-        self._atomik(self.yol, json.dumps(veri, indent=2, ensure_ascii=False, sort_keys=True) + "\n")
+        return json.dumps(veri, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
+
+    def _yaz(self):
+        self._atomik(self.yol, self._metin())
 
     def cevap(self, klip, soru):
         return self.cevaplar.get(klip, {}).get(soru)
@@ -190,6 +228,8 @@ class CevapDeposu:
         with self._kilit:
             if self.bitti:
                 raise Reddedildi("Puanlama bitirildi, cevap degistirilemez")
+            if not isinstance(klip, str) or not isinstance(soru, str):
+                raise Reddedildi("klip ve soru yazi olmali")
             if klip not in self.beklenen:
                 raise Reddedildi("bilinmeyen klip")
             if soru not in self.beklenen[klip]:
@@ -225,9 +265,16 @@ class CevapDeposu:
                 raise Reddedildi(f"Bitirmek icin tum sorular cevaplanmali ({yapilan}/{toplam})")
             self.bitti = True
             self.bitis = datetime.now().astimezone().isoformat(timespec="seconds")
+            # Sira: once sha (son dosya icerigi bellekte hesaplanir), sonra json. Boylece
+            # "bitti=true ama sha yok" durumu hicbir kesintide kalici olmaz.
             try:
-                self._yaz()
+                metin = self._metin()
+                self._yaz_sha(hashlib.sha256(metin.encode("utf-8")).hexdigest())
+                self._atomik(self.yol, metin)
             except BaseException:
                 self.bitti, self.bitis = False, None
+                try:
+                    self.sha_yolu.unlink()
+                except OSError:
+                    pass
                 raise
-            self._yaz_sha(hashlib.sha256(self.yol.read_bytes()).hexdigest())

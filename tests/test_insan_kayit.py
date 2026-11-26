@@ -1,9 +1,14 @@
 """İnsan puanlama aracı testleri. Yalnız UYDURMA veri; gerçek soru metni yok."""
+import contextlib
 import hashlib
+import io
 import json
+import re
+import socket
 import tempfile
 import threading
 import unittest
+from unittest import mock
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -188,12 +193,155 @@ class OturumTest(unittest.TestCase):
         with self.assertRaises(ik.AracHatasi):
             ik.oturum_kur(self.kok, *self.d, self.cevap)
 
+    # ---- D3 / D4 ----
+    def gercek_bicim(self, kok, klip, komut_satirlari, soru_satirlari):
+        """hakem_hazirla ciktisinin bicimi: baslik, komut, bos satir, Sorular:, kurallar."""
+        metin = ("TUTAR uydurma sablon\n\nVideoya verilen komut:\n"
+                 + "\n".join(komut_satirlari) + "\n\nSorular:\n" + "\n".join(soru_satirlari)
+                 + "\n\nKurallar:\n1. uydurma kural\n")
+        (Path(kok) / "hakem_girdi" / klip / "sorular.txt").write_text(metin, encoding="utf-8")
+
+    def k001_dogru(self):
+        return (["Uydurma command two"],
+                ["a1: Uydurma soru bir?", "a2: Uydurma soru iki?", "a3: Uydurma <bilgi> sorusu?"])
+
+    def acilir_mi(self, kok, d):
+        return ik.oturum_kur(kok, *d, Path(kok) / "c.json")
+
+    def test_gercek_bicimli_dosya_acilir(self):
+        kok = Path(tempfile.mkdtemp())
+        d = dunya(kok)
+        k, s = self.k001_dogru()
+        self.gercek_bicim(kok, "K001", k, s)
+        self.assertEqual(len(self.acilir_mi(kok, d).klipler), 3)
+
+    def test_sorularda_fazladan_soru_acilmaz(self):
+        kok = Path(tempfile.mkdtemp())
+        d = dunya(kok)
+        k, s = self.k001_dogru()
+        self.gercek_bicim(kok, "K001", k, s + ["a9: Uydurma fazla soru?"])
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    def test_sorularda_eksik_soru_acilmaz(self):
+        kok = Path(tempfile.mkdtemp())
+        d = dunya(kok)
+        k, s = self.k001_dogru()
+        self.gercek_bicim(kok, "K001", k, s[:2])
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    def test_soru_metnine_ek_acilmaz(self):
+        kok = Path(tempfile.mkdtemp())
+        d = dunya(kok)
+        k, s = self.k001_dogru()
+        s[0] = s[0] + " Ayrica sunu da dusun."
+        self.gercek_bicim(kok, "K001", k, s)
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    def test_soru_metnine_onek_acilmaz(self):
+        kok = Path(tempfile.mkdtemp())
+        d = dunya(kok)
+        k, s = self.k001_dogru()
+        s[1] = "x" + s[1]  # kimlik bozulur: kimlik kumesi tutmaz
+        self.gercek_bicim(kok, "K001", k, s)
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    def test_komut_metnine_ek_acilmaz(self):
+        kok = Path(tempfile.mkdtemp())
+        d = dunya(kok)
+        k, s = self.k001_dogru()
+        self.gercek_bicim(kok, "K001", [k[0] + " quickly"], s)
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    def test_komut_satiri_baska_satirin_parcasi_acilmaz(self):
+        kok = Path(tempfile.mkdtemp())
+        d = dunya(kok)
+        k, s = self.k001_dogru()
+        self.gercek_bicim(kok, "K001", ["prefix " + k[0]], s)
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    def test_ayni_kimlik_iki_kez_acilmaz(self):
+        kok = Path(tempfile.mkdtemp())
+        d = dunya(kok)
+        k, s = self.k001_dogru()
+        self.gercek_bicim(kok, "K001", k, s + [s[0]])
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    def bitmis(self):
+        o = self.kur()
+        self.hepsini_cevapla(o)
+        o.depo.bitir()
+        return o
+
+    def test_bitti_ama_sha_yoksa_acik_hata(self):
+        self.bitmis()
+        (self.cevap.parent / "cevaplar.sha256").unlink()
+        with self.assertRaises(ik.AracHatasi):
+            ik.oturum_kur(self.kok, *self.d, self.cevap)
+        self.assertFalse((self.cevap.parent / "cevaplar.sha256").exists())  # sessizce uretilmedi
+
+    def test_bitti_ama_eksik_cevap_acik_hata(self):
+        self.kur()
+        self.cevap.parent.mkdir(parents=True, exist_ok=True)
+        self.cevap.write_text(json.dumps({"surum": "v1", "bitti": True, "bitis": "t",
+                                          "cevaplar": {"K001": {"a1": "evet"}}}))
+        (self.cevap.parent / "cevaplar.sha256").write_text(
+            hashlib.sha256(self.cevap.read_bytes()).hexdigest() + "  cevaplar.json\n")
+        with self.assertRaises(ik.AracHatasi):
+            ik.oturum_kur(self.kok, *self.d, self.cevap)
+
+    def test_bitir_sha_yazilamazsa_bitti_kalici_olmaz(self):
+        o = self.kur()
+        self.hepsini_cevapla(o)
+        with mock.patch.object(ik.CevapDeposu, "_yaz_sha", side_effect=OSError("disk")):
+            with self.assertRaises(OSError):
+                o.depo.bitir()
+        self.assertFalse(o.depo.bitti)
+        self.assertFalse(json.loads(self.cevap.read_text())["bitti"])
+        self.assertFalse((self.cevap.parent / "cevaplar.sha256").exists())
+        yeni = ik.oturum_kur(self.kok, *self.d, self.cevap)  # acilir, "bitti ama sha yok" yok
+        self.assertFalse(yeni.depo.bitti)
+        yeni.depo.kaydet("K001", "a1", "hayir")
+        yeni.depo.bitir()  # sonra yine bitirilebilir
+        self.assertTrue(yeni.depo.bitti)
+
+    def test_bitir_json_yazilamazsa_sha_de_kalmaz(self):
+        o = self.kur()
+        self.hepsini_cevapla(o)
+        gercek = ik.CevapDeposu._atomik
+
+        def bozuk(depo, yol, metin):
+            if yol == depo.yol and '"bitti": true' in metin:
+                raise OSError("disk")
+            return gercek(depo, yol, metin)
+
+        with mock.patch.object(ik.CevapDeposu, "_atomik", bozuk):
+            with self.assertRaises(OSError):
+                o.depo.bitir()
+        self.assertFalse(o.depo.bitti)
+        self.assertFalse((self.cevap.parent / "cevaplar.sha256").exists())
+        self.assertFalse(ik.oturum_kur(self.kok, *self.d, self.cevap).depo.bitti)
+
+    def test_kaydet_yanlis_tur_reddi(self):
+        o = self.kur()
+        for k, s, c in [(["K001"], "a1", "evet"), ("K001", ["a1"], "evet"),
+                        ({"x": 1}, "a1", "evet"), ("K001", 5, "evet"), (7, "a1", "evet")]:
+            with self.assertRaises(ik.Reddedildi, msg=(k, s, c)):
+                o.depo.kaydet(k, s, c)
+        self.assertFalse(self.cevap.exists())
+
 
 class KaynakTest(unittest.TestCase):
     def test_hakem_cevap_yollari_kodda_yok(self):
         for yol in ("tutar/insan_kayit.py", "scripts/insan_puanla.py"):
             kaynak = (DEPO / yol).read_text(encoding="utf-8")
-            for yasak in ("judge_raw", "hakem/v1", "hakem\\v1"):
+            for yasak in ("judge_raw", "hakem/v1", "hakem\\v1", "hakem_cikti", "cikti/"):
                 self.assertNotIn(yasak, kaynak, f"{yol}: {yasak}")
 
 
@@ -282,9 +430,96 @@ class SunucuTest(unittest.TestCase):
         durum, _, _ = self.al("/cevap", b"bozuk")
         self.assertEqual(durum, 400)
 
+    def test_cevap_yanlis_tur_400_ve_yazmaz(self):
+        onceki = self.cevap.read_bytes() if self.cevap.exists() else None
+        kotu = [{"klip": ["K001"], "soru": "a1", "cevap": "evet"},
+                {"klip": "K001", "soru": ["a1"], "cevap": "evet"},
+                {"klip": {"x": 1}, "soru": "a1", "cevap": "evet"},
+                {"klip": "K001", "soru": 5, "cevap": "evet"},
+                {"klip": "K001", "soru": "a1", "cevap": ["evet"]},
+                {"klip": "K001", "soru": "a1", "cevap": {"a": 1}},
+                {"klip": None, "soru": None, "cevap": None}, [1, 2], "metin", 5]
+        for v in kotu:
+            durum, _, g = self.al("/cevap", v)
+            self.assertEqual(durum, 400, v)
+            self.assertIn("hata", json.loads(g))
+        durum, _, _ = self.al("/cevap", b"[" * 3000)
+        self.assertEqual(durum, 400)
+        sonra = self.cevap.read_bytes() if self.cevap.exists() else None
+        self.assertEqual(onceki, sonra)
+
+    def test_bitir_yanlis_govde_400(self):
+        for v in ([1], "x", {"klip": ["K001"]}, 5):
+            durum, _, g = self.al("/bitir", v)
+            self.assertEqual(durum, 400, v)
+            self.assertIn("hata", json.loads(g))
+
+    def test_buyuk_gorunum_gercek_boyut(self):
+        _, _, g = self.al("/klip/K001")
+        g = g.decode("utf-8")
+        self.assertIn("gercek", g)           # 1:1 kipi sinifi
+        self.assertIn("overflow:auto", sunucu.CSS)
+        self.assertIn("max-width:none", sunucu.CSS)
+
     def test_bitir_eksikse_400(self):
         durum, _, _ = self.al("/bitir", {})
         self.assertEqual(durum, 400)
+
+
+class AciklamaTest(unittest.TestCase):
+    def test_hakem_kural_6_ornekleri_sayfada(self):
+        sablon = (DEPO / "judge" / "judge_prompt_v1.txt").read_text(encoding="utf-8")
+        duz = " ".join(sablon.split())
+        m = re.search(r"Örnekler: (.*?)\. Ama", duz)
+        self.assertIsNotNone(m)
+        sayfa = " ".join(re.sub(r"<[^>]+>", "", sunucu.ACIKLAMA).split())
+        self.assertIn(m.group(1), sayfa)
+        self.assertIn("önceki bilgi", sayfa)
+
+
+class BaslatmaTest(unittest.TestCase):
+    def calistir(self, argv, cevap=None, girdi=None):
+        kok = Path(tempfile.mkdtemp())
+        d = dunya(kok)
+        cevap = cevap or kok / "g" / "v1" / "cevaplar.json"
+        err, out = io.StringIO(), io.StringIO()
+        with mock.patch.object(sunucu, "_girdiler", lambda: d, create=True), \
+                contextlib.redirect_stderr(err), contextlib.redirect_stdout(out):
+            kod = sunucu.main(["--kok", str(kok), "--cevap-dosyasi", str(cevap)] + argv)
+        return kod, err.getvalue(), cevap
+
+    def test_port_dolu_turkce_mesaj(self):
+        s = socket.socket()
+        s.bind(("127.0.0.1", 0))
+        s.listen(1)
+        try:
+            kod, err, _ = self.calistir(["--port", str(s.getsockname()[1])])
+        finally:
+            s.close()
+        self.assertEqual(kod, 1)
+        self.assertIn("başka bir pencerede", err)
+        self.assertIn("--port 8766", err)
+        self.assertNotIn("Address already in use", err)
+        self.assertNotIn("Traceback", err)
+
+    def test_port_gecersiz_turkce_mesaj(self):
+        for p in ("99999", "-1", "abc", "", "80.5"):
+            kod, err, _ = self.calistir(["--port", p])
+            self.assertEqual(kod, 1, p)
+            self.assertIn("--port 8766", err)
+            self.assertNotIn("Traceback", err)
+            self.assertNotIn("Overflow", err)
+            self.assertNotIn("invalid", err)
+
+    def test_bozuk_cevap_dosyasi_turkce(self):
+        yol = Path(tempfile.mkdtemp()) / "cevaplar.json"
+        yol.write_text("{bozuk", encoding="utf-8")
+        kod, err, _ = self.calistir(["--port", "0"], cevap=yol)
+        self.assertEqual(kod, 1)
+        self.assertIn(str(yol), err)
+        self.assertIn("bozuk", err)
+        for ham in ("Expecting", "JSONDecodeError", "line 1 column", "Traceback"):
+            self.assertNotIn(ham, err)
 
 
 if __name__ == "__main__":

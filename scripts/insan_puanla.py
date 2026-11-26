@@ -38,9 +38,10 @@ button{font:inherit;padding:8px 20px;margin-right:8px;border:2px solid #000;
 background:#fff;color:#000;cursor:pointer}
 button.sec{background:#000;color:#fff}
 button:disabled{border-color:#888;color:#888;cursor:default}
-#kutu{display:none;position:fixed;inset:0;background:#fff;text-align:center;z-index:9}
-#kutu img{max-width:96vw;max-height:88vh;margin-top:4vh}
-#kutu p{margin:4px}
+#kutu{display:none;position:fixed;inset:0;background:#fff;text-align:center;z-index:9;overflow:auto}
+#kutu img{display:block;max-width:96vw;max-height:84vh;margin:0 auto;cursor:zoom-in}
+#kutu.gercek img{max-width:none;max-height:none;margin:0;cursor:zoom-out}
+#kutu p{margin:0;padding:4px;position:sticky;top:0;left:0;background:#fff}
 .hata{font-weight:bold}
 table{border-collapse:collapse}td,th{border:1px solid #000;padding:6px 12px;text-align:left}
 """
@@ -48,12 +49,12 @@ table{border-collapse:collapse}td,th{border:1px solid #000;padding:6px 12px;text
 ACIKLAMA = (
     "Her soruya karelere bakarak <b>evet</b>, <b>hayır</b> ya da <b>görünmüyor</b> de. "
     "<b>Görünmüyor</b>: sorunun ilgilendiği nesne ya da bölüm karelerde görünmüyorsa. "
-    "Sadece bu karelere bak; başka kaynak ya da tahmin kullanma. "
+    "Sadece bu karelere bak; başka kaynak, önceki bilgi ya da tahmin kullanma. "
     "Bozuldu mu türü sorularda ilk kareyle karşılaştırarak karar ver. "
-    "Komutun kendisinin istediği değişiklik (ifade değişimi, kıyafet değişimi, komutta geçen "
-    "nesnenin eklenmesi ya da yer değiştirmesi) hata sayılmaz; ama yüzün başka birine dönmesi, "
+    "Komutun kendisinin istediği değişiklik (ifade değişimi, yüzdeki ışığın kapanması, kıyafet "
+    "değişimi, komutta geçen nesnenin eklenmesi ya da yer değiştirmesi) hata sayılmaz; ama yüzün başka birine dönmesi, "
     "saç, göz ya da kıyafetin komutun istemediği biçimde değişmesi hatadır. "
-    "Soruları birbirinden bağımsız cevapla. Emin olmasan da üçünden birini seçmelisin. "
+    "Soruları birbirinden bağımsız cevapla; bir sorudaki cevabın diğerini etkilemesine izin verme. Emin olmasan da üçünden birini seçmelisin. "
     "Cevaplar her tıklamada kaydedilir; <b>Bitir</b>'e basana kadar değiştirebilirsin."
 )
 
@@ -141,9 +142,12 @@ def sayfa_klip(oturum, kod):
              f"<div class=\"komut\"><b>Videoya verilen komut (İngilizce):</b><br>"
              f"{html.escape(k['komut_en'])}</div>"
              f"<p>{len(k['kareler'])} kare, videodan sırayla. Büyütmek için kareye tıkla; "
-             "ok tuşlarıyla ileri/geri, Esc ile kapat.</p>"
+             "ok tuşlarıyla ileri/geri, Esc ile kapat. Büyük karede tekrar tıklarsan gerçek piksel boyutuna "
+             "geçer (kaydırabilirsin), bir daha tıklarsan ekrana sığar.</p>"
              f"<div class=\"izgara\" id=\"izgara\">{kareler}</div>"
-             f"<div id=\"kutu\"><p id=\"kno\"></p><img id=\"buyuk\" alt=\"\"></div>"
+             f"<div id=\"kutu\"><p><span id=\"kno\"></span> &mdash; kareye tıkla: gerçek boyut (1:1) / ekrana sığdır; "
+             "ok tuşları: önceki/sonraki; Esc ya da <button id=\"kapat\">Kapat</button></p>"
+             "<img id=\"buyuk\" alt=\"\"></div>"
              f"{''.join(sorular)}{nav}{_bitir_bolumu(oturum)}")
     betik = ("var KLIP=" + json.dumps(kod) + ";" + BITIR_BETIK + """
 var imgs=document.querySelectorAll('#izgara img'),kutu=document.getElementById('kutu'),
@@ -151,11 +155,14 @@ var imgs=document.querySelectorAll('#izgara img'),kutu=document.getElementById('
 function goster(i){if(i<0||i>=imgs.length)return;cur=i;buyuk.src=imgs[i].src;
  kno.textContent='kare '+(i+1)+' / '+imgs.length;kutu.style.display='block';}
 imgs.forEach(function(m){m.onclick=function(){goster(+m.dataset.i)}});
-kutu.onclick=function(){kutu.style.display='none';cur=-1;};
+function kapat(){kutu.style.display='none';kutu.className='';cur=-1;}
+buyuk.onclick=function(){kutu.className=kutu.className==='gercek'?'':'gercek';};
+document.getElementById('kapat').onclick=kapat;
+kutu.onclick=function(e){if(e.target===kutu)kapat();};
 document.addEventListener('keydown',function(e){if(cur<0)return;
  if(e.key==='ArrowRight'){goster(cur+1);e.preventDefault();}
  else if(e.key==='ArrowLeft'){goster(cur-1);e.preventDefault();}
- else if(e.key==='Escape'){kutu.style.display='none';cur=-1;}});
+ else if(e.key==='Escape'){kapat();}});
 document.querySelectorAll('button[data-soru]').forEach(function(b){b.onclick=function(){
  fetch('/cevap',{method:'POST',headers:{'Content-Type':'application/json'},
   body:JSON.stringify({klip:KLIP,soru:b.dataset.soru,cevap:b.dataset.cevap})})
@@ -215,7 +222,7 @@ class _Isleyici(BaseHTTPRequestHandler):
             if not 0 <= n <= 4096:
                 raise ValueError
             veri = json.loads(self.rfile.read(n) or b"{}")
-        except ValueError:
+        except (ValueError, RecursionError):
             raise ik.Reddedildi("istek okunamadı")
         if not isinstance(veri, dict):
             raise ik.Reddedildi("istek okunamadı")
@@ -235,6 +242,8 @@ class _Isleyici(BaseHTTPRequestHandler):
                 return self._json(200, {"tamam": True})
         except ik.Reddedildi as hata:
             return self._json(400, {"hata": str(hata)})
+        except (TypeError, KeyError, AttributeError):
+            return self._json(400, {"hata": "İstekteki alanlar yanlış türde"})
         except OSError as hata:
             return self._json(500, {"hata": f"Dosyaya yazılamadı: {hata.strerror}"})
         self._yok()
@@ -246,28 +255,56 @@ def sunucu_kur(oturum, port=8765):
     return srv
 
 
+def _girdiler():
+    def oku(yol):
+        return json.loads(Path(yol).read_text(encoding="utf-8"))
+    return (oku(DEPO / "data" / "insan_secimi.json"),
+            oku(DEPO / "secret" / "hakem" / "esleme.json"),
+            oku(DEPO / "secret" / "checks.json"),
+            oku(DEPO / "data" / "commands.json"))
+
+
+def _port(metin):
+    try:
+        n = int(metin)
+    except (TypeError, ValueError):
+        n = -1
+    if not 0 <= n <= 65535:
+        raise ValueError
+    return n
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--port", type=int, default=8765)
+    ap.add_argument("--port", default="8765")
     ap.add_argument("--kok", default=str(KOK_VARSAYILAN))
     ap.add_argument("--cevap-dosyasi", default=str(CEVAP_VARSAYILAN))
     a = ap.parse_args(argv)
-
-    def oku(yol):
-        return json.loads(Path(yol).read_text(encoding="utf-8"))
-
     try:
-        oturum = ik.oturum_kur(
-            a.kok, oku(DEPO / "data" / "insan_secimi.json"),
-            oku(DEPO / "secret" / "hakem" / "esleme.json"),
-            oku(DEPO / "secret" / "checks.json"),
-            oku(DEPO / "data" / "commands.json"), a.cevap_dosyasi)
-        srv = sunucu_kur(oturum, a.port)
+        port = _port(a.port)
+    except ValueError:
+        print(f"Port geçersiz: {a.port!r}. Port 0 ile 65535 arasında bir sayı olmalı. "
+              "Örnek: --port 8766", file=sys.stderr)
+        return 1
+    try:
+        oturum = ik.oturum_kur(a.kok, *_girdiler(), a.cevap_dosyasi)
     except ik.AracHatasi as hata:
-        print(f"Arac acilamadi: {hata}", file=sys.stderr)
+        print(f"Araç açılamadı: {hata}", file=sys.stderr)
+        return 1
+    except (ValueError, KeyError, TypeError):
+        print("Araç açılamadı: depodaki bir veri dosyası okunamadı ya da bozuk "
+              "(insan_secimi, esleme, checks, commands).", file=sys.stderr)
         return 1
     except OSError as hata:
-        print(f"Arac acilamadi: {hata.strerror}", file=sys.stderr)
+        print(f"Araç açılamadı: bir dosya okunamadı ({hata.filename or hata.strerror}).",
+              file=sys.stderr)
+        return 1
+    try:
+        srv = sunucu_kur(oturum, port)
+    except OSError:
+        print(f"Araç açılamadı: {port} numaralı port kullanılamıyor. Araç başka bir pencerede "
+              "zaten açık olabilir; onu kapat ya da başka bir port ver, örneğin: --port 8766",
+              file=sys.stderr)
         return 1
     print(f"Tarayicida ac: http://127.0.0.1:{srv.server_address[1]}/")
     sys.stdout.flush()
