@@ -188,3 +188,14 @@ Bu ek de hakem çalışmadan ÖNCE yazıldı. Hiçbir klip hakeme gösterilmedi.
 - (g) Saniyede 10 kare: iki kare arasındaki (yaklaşık 0,1 sn) kısa bozulmalar kaçabilir. 24 fps kliplerde kareler arası adım eşit değildir (2-3 kare), 30 fps klipte eşittir (3 kare).
 - (h) Dosya adlarında ipucu yok ama görüntünün kendisi modeli ele verebilir (çizim farkı, hareket akıcılığı). PNG dosyalarının metin içermeyen yardımcı parçaları iki modelde farklıdır.
 - (i) 20 klibi puanlayacak insan bu projenin sahibidir: videoları o üretti, bu belgedeki sınırları biliyor. Model adını görmeden puanlar ama tam kör sayılmaz.
+
+## Hakem kurallarında çelişki giderme ve ek sınırlar (26 Kasım 2026, hakem çalışmadan önce)
+
+Bu bölüm de hakem çalışmadan ÖNCE yazıldı. Hiçbir klip hakeme gösterilmedi. Yukarıdaki iki hakem bölümündeki hiçbir satırı değiştirmez; yalnız çelişkileri giderir ve bilinen sınırları ekler.
+
+1. **Öncelik.** "Hakem çalıştırma kuralları" ile "Hakem kurallarına ekler" çelişirse EKLER ve bu bölüm geçerlidir.
+2. **Deneme kuralı.** İlk bölümdeki "Denemeden sonra bu kurallar değişirse değişiklik ve nedeni buraya yazılır." cümlesi artık yalnız şu anlama gelir: denemeden sonra metin, talimat ya da doğrulama değişmek zorunda kalırsa yeni sürüm alınır, nedeni buraya yazılır ve 98 klibin hepsi baştan çalıştırılır. Not düşüp yalnız kalan klipleri yeni kuralla çalıştırmak YASAKTIR.
+3. **Kare alanı.** Donmuş hakem metni (`judge/judge_prompt_v1.txt`) örnekte kare numarasını tırnak içinde gösterir; talimat tam sayı ister. Hakem ikisini de görür. Geçerli sayılanlar: 1-50 arası tam sayı, aynı sayının metin hali (örn. "7") ve boş/null. Başka her şey geçersizdir. Donmuş metin bu yüzden değiştirilmedi.
+4. **Metin dosyasının yeri.** Hakemin metin dosyası `hakem_girdi/Kxxx/sorular.txt` içindedir (ilk bölüm yeri söylemiyordu).
+5. **Sınır, klasör yapısı.** Hakemin klasöründen üst dizine çıkılırsa öteki 97 klibin klasörleri, iki üst dizinde de model adlarıyla ayrılmış özgün kare klasörü (`frames/`) görünür. Teknik duvar yoktur; yalnız talimat yasaklar ve her çalıştırmanın araç kaydı sonradan taranır.
+6. **Sınır, kayıt.** Kayıt betiği yalnız kendisine bildirilen denemeleri sayar. Lider betiği çağırmadan hakemi yeniden çalıştırırsa, çıktı dosyasını kendisi yazarsa ya da günlük ile ham dosyayı birlikte silerse kod bunu göremez. "En çok iki deneme" ve "geçerli çıktı yeniden çalıştırılmaz" kuralları bu yüzden kısmen lidere güvene dayanır. Buna karşı tutulan iz: her hakem alt ajanının oturum kaydı saklanır ve başlatılan hakem sayısı ile günlükteki deneme sayısı sonuçla birlikte yayımlanır; ikisi tutmazsa fark açıklanır.
