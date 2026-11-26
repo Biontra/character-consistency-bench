@@ -1,55 +1,52 @@
 # Character Consistency Bench (TUTAR)
 
-TUTAR, video modellerinin bir karaktere iş yaptırırken karakteri bozmadan tutup tutamadığını ölçen küçük bir benchmark'tır.
+TUTAR is a small benchmark that measures whether video models can keep a character intact while making that character do something.
 
-## Ne ölçüyor
+## What it measures
 
-İki soru sorar ve ikisini ayrı puanlar:
+It asks two questions and scores them separately:
 
-1. Model komutu yaptı mı?
-2. Yaparken karakteri (Aikyo) tuttu mu?
+1. Did the model do the command?
+2. Did it keep the character (Aikyo) while doing it?
 
-Girdi: tek başlangıç resmi ve 20 komut. Komutlar Türkçe yazıldı, modellere İngilizce çevirisi verilir. Beş modelin her biri her komut için bir video üretir: 100 deneme, 98 klip, 2 güvenlik reddi.
+Input: one start image and 20 commands. The commands were written in Turkish; the models get an English translation. Each of the five models generates one video per command: 100 attempts, 98 clips, 2 safety refusals.
 
-## Ne ölçmüyor
+## What it does not measure
 
-- Genel video kalitesi
-- Ses (hakem yalnız karelere bakar; sesi kapatılamayan iki modelde ses sonradan silindi)
-- Hız
-- Fiyat
+- General video quality
+- Audio (the judge only looks at frames; for the two models where audio could not be turned off, it was removed afterwards)
+- Speed
+- Price
 
-## Nasıl puanlanır
+## How it is scored
 
-- Hakem Claude'dur. Videodan kod ile saniyede 10 kare ve her karenin üst ve alt yarı kırpmaları çıkarılır, hakem bu karelere bakarak cevap verir.
-- 101 puanlı soru vardır (ayrıca 2 puansız bilgi sorusu var; bunlar puana ve döküme girmez). Her sorunun dört cevabı olabilir: evet, hayır, görünmüyor, hakem yok. Bir modelin 20 klibinin hepsi üretilirse 343, beş model için 1.715 puanlı cevap toplanır. Bir model 2 klip üretemediği için gerçek sayı daha azdır.
-- Sonuç iki ayrı sütundur: "komutu yaptı %" ve "karakteri tuttu %". Tek sayıda toplanmaz. Soru türüne (ortak, grup, özel) göre döküm de verilir. Sonuç tablosunda model başına "üretti: N/20" sütunu da yer alır.
-- İnsan kontrolü: kod ile tohumla seçilen 20 klibi hakemin cevabını görmeden elle puanlarım. İnsan ile hakem uyum eşiği %85'tir. Altında çıkarsa sonuç olduğu gibi yayınlanır.
-- Üretilemeyen (reddedilen) klip kuralı videolar üretildikten sonra yazıldı: o komut "yaptı" puanında yapmadı sayılır, "tuttu" puanına girmez (`PROTOCOL.md`).
-- "Karakteri tuttu" puanı ayrıca beş modelin hepsinin ürettiği 18 ortak komut üzerinden de gösterilir; bu satır videolar üretildikten sonra eklendi (`PROTOCOL.md`).
+- The judge is Claude. Code extracts 10 frames per second from each video, plus a top-half and bottom-half crop of every frame, and the judge answers by looking at these frames.
+- There are 101 scored questions (plus 2 unscored information questions, which do not enter the score or the breakdown). Each question can get one of four answers: yes, no, not visible, no judge answer. If a model generates all 20 of its clips, that gives 343 scored answers, or 1,715 for five models. The real number is lower because one model could not generate 2 clips.
+- The result is two separate columns: "did the command %" and "kept the character %". They are not merged into one number. A breakdown by question type (common, group, specific) is also given. The results table also has a "generated: N/20" column per model.
+- Human check: I score 20 clips by hand, chosen by code with a fixed seed, without seeing the judge's answers. The agreement threshold between human and judge is 85%. If it comes out lower, the result is published as it is.
+- The rule for clips that could not be generated (refused) was written after the videos were made: that command counts as not done in the "did" score and does not enter the "kept" score (`PROTOCOL.md`).
+- The "kept the character" score is also shown over the 18 commands that all five models generated; this row was added after the videos were made (`PROTOCOL.md`).
 
-## Sınırlar
+## Limits
 
-- Tek karakter
-- Tek başlangıç resmi
-- Tek deneme (her komut, her modelde bir kez üretilir)
-- Beş modelin üçü ucuz sürümdür
-- Kare bazlı tek hakem (ikinci hakem yok)
-- 20 komut
+- One character
+- One start image
+- One try (each command is generated once per model)
+- Three of the five models are cheap tiers
+- A single frame-based judge (no second judge)
+- 20 commands
+- 77 of the 103 questions were written by hand; the rest were written by AI or are unconfirmed readings
 
-## Neyin gizli olduğu ve neden
+## What is private and why
 
-Sorular, cevap anahtarı, başlangıç resmi, videolar ve kareler gizlidir. Sorular herkese açık olursa bir model ya da sağlayıcı bu soruların cevabına göre ayarlanabilir. Bu dosyalar Hugging Face'te kapalı (elle onaylı) bir veri setinde duracak. Bu repoda yalnız kod, kurallar, 20 komut, sonuç tablosu, sınırlar ve gizli dosyaların SHA-256 parmak izleri bulunur. Açık dosyalarda sorular yalnız kimlikle geçer.
+The questions, the answer key, the start image, the videos and the frames are private. If the questions were public, a model or provider could be tuned to their answers. These files will live in a gated (manually approved) dataset on Hugging Face. This repo holds only the code, the rules, the 20 commands, the results table, the limits and the SHA-256 fingerprints of the private files. In the open files, questions appear only by ID.
 
-Süreç ve dondurma kuralları için `PROTOCOL.md` dosyasına bakın.
+See `PROTOCOL.md` for the process and the freezing rules. It is written in Turkish.
 
-Üretimden sonra görülen sınırlar `PROTOCOL.md` içindeki "Üretimden sonra görülen sınırlar (26 Kasım 2026)" bölümünde.
+Limits noticed after generation are in the `PROTOCOL.md` section "Üretimden sonra görülen sınırlar (26 Kasım 2026)".
 
-Hakem çalıştırma kuralları hakem çalışmadan önce `PROTOCOL.md` içinde yazıldı.
+The rules for running the judge were written in `PROTOCOL.md` before the judge ran.
 
-## Sonuçlar
+## Results
 
-Videolar üretildi: 100 deneme, 98 klip, 2 güvenlik reddi. Hakem ve insan puanlaması henüz yapılmadı.
-
-## English summary
-
-TUTAR measures whether video models keep a character intact while carrying out a command. It reports two separate columns: whether the command was done, and whether the character was kept. Five models each try one clip for each of 20 commands from a single start image: 100 attempts, 98 clips, 2 safety refusals. A Claude judge answers 101 scored questions (plus 2 unscored information questions) from frames extracted by code, and a human re-scores 20 clips chosen by a fixed seed, with an agreement threshold of 85% written down in advance. A rule for clips a model refused to generate (counted as not done, ignored for character score) was written after the videos were made, and so was an extra character score over the 18 commands all five models generated. The questions, answer key, start image, clips and frames stay private in a gated Hugging Face dataset; only their SHA-256 fingerprints are published here.
+The videos are generated: 100 attempts, 98 clips, 2 safety refusals. The judge has run: 95 clips have judge answers, 3 clips have none. The human scoring of 20 clips is not done yet, so no results table is published.
