@@ -325,3 +325,11 @@ Bu bölüm yalnız ekleme yapar; yukarıdaki hiçbir satır değişmedi. Hakem c
 5. **Kullanılmadı.** Kod gerçek veriyle henüz ÇALIŞTIRILMADI: `results/judge_raw.jsonl` ve `secret/hakem/v1` okunmadı. Testler uydurma küçük dünyayla elle hesaplanmış değerleri doğrular (`tests/test_sonuc_tablosu.py`, `tests/test_sonuc_uret.py`).
 6. **Sonra.** İnsan puanlaması ve uyum hesabı bitince tek komutla çalıştırılacak: `python3 scripts/sonuc_uret.py --checks secret/checks.json --hakem-ham results/judge_raw.jsonl --uretim-kaydi uretim_kaydi --modeller data/models.json --cikti-dizin results --uyum-raporu <uyum_hesapla çıktısı>`.
 7. **Tanımlı olmayan, eklenmeyen.** İnsan yazımı ve yapay zekâ yazımı soruların (`kaynak`) ayrı raporlanması Hafta 4 görevinde istenir, ama PROTOCOL'de puanlama kuralı olarak tanımlı değildir; eklenmedi. "Hakemin puanladığı klip" burada üretilmiş klip eksi tümü hakem_yok klip olarak okundu ("tümü hakem_yok": bütün cevapları, puansızlar dahil, hakem_yok; `tutar/uyum_girdi.py` ile aynı tanım).
+
+## Sonuç tablosu koduna ekler (26 Kasım 2026, insan puanlamasından önce)
+
+Bu bölüm yalnız ekleme yapar; yukarıdaki hiçbir satır değişmedi. Hakem cevaplarına ya da puanlara bakılmadı.
+
+1. **Tek grafik eklendi.** Görev metni doğruluk ve doğru cevap başına maliyetin tek grafikte olmasını istiyor; `results/grafik_dogruluk_maliyet.svg` bunu verir (solda "komutu yaptı %" ve "karakteri tuttu %" ayrı çubuklar, sağda ayrı eksenle tutulan karakter cevabı başına kredi). İki sütun yine toplanmaz, tek bir "doğruluk" sayısı üretilmez. Önceki iki grafik duruyor.
+2. **Soru bazlı `sonuclar.csv` üretilmez.** Görev metni soru bazlı bir `sonuclar.csv` istiyor; açık depoda model başına özet yayımlanır, çünkü soru bazlı dosya cevap anahtarını açar. Soru bazlı dosya yalnız kapalı veri setine konacak.
+3. **Klip sayısı.** RESULTS.md'deki "İnsan N klibi puanladı" sayısı sabit değil, uyum raporunun `klip_sayisi` alanından okunur; alan yoksa araç hata verir.
