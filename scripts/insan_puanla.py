@@ -178,6 +178,14 @@ document.querySelectorAll('button[data-soru]').forEach(function(b){b.onclick=fun
     return _sayfa(f"Klip {sira + 1} / {n} — {kod}", govde, betik)
 
 
+GOVDE_SINIR = 4096                    # kabul edilen gövde (bayt); fazlası 413
+GOVDE_OKU_ATLA_USTU = 64 * 1024 * 1024  # bunun üstünde gövde okunmaz, bağlantı kapatılır
+
+
+class _CokBuyuk(ik.Reddedildi):
+    pass
+
+
 class _Isleyici(BaseHTTPRequestHandler):
     server_version = "insan-puanla"
 
@@ -190,6 +198,8 @@ class _Isleyici(BaseHTTPRequestHandler):
         self.send_response(kod)
         self.send_header("Content-Type", tur)
         self.send_header("Content-Length", str(len(veri)))
+        if self.close_connection:
+            self.send_header("Connection", "close")
         if not onbellek:
             self.send_header("Cache-Control", "no-store")
         self.end_headers()
@@ -215,13 +225,34 @@ class _Isleyici(BaseHTTPRequestHandler):
         self._yok()
 
     def _govde(self):
+        try:
+            n = int(self.headers.get("Content-Length", "0"))
+            if n < 0:
+                raise ValueError
+        except ValueError:
+            self.close_connection = True
+            raise ik.Reddedildi("istek okunamadı")
+        if n > GOVDE_OKU_ATLA_USTU:
+            # Çok büyük: gövdeyi okumadan 413 yaz ve bağlantıyı kapat.
+            self.close_connection = True
+            raise _CokBuyuk("İstek çok büyük")
+        kalan = n
+        parca = b""
+        while kalan > 0:  # gövde (büyük olsa da) tam okunur; böylece istemci yazarken kopmaz
+            p = self.rfile.read(min(kalan, 65536))
+            if not p:
+                break
+            if len(parca) <= GOVDE_SINIR:
+                parca += p
+            kalan -= len(p)
+        if n > GOVDE_SINIR:
+            raise _CokBuyuk("İstek çok büyük")
         if self.headers.get("Content-Type", "").split(";")[0].strip() != "application/json":
             raise ik.Reddedildi("istek biçimi geçersiz")
         try:
-            n = int(self.headers.get("Content-Length", "0"))
-            if not 0 <= n <= 4096:
+            if n > 4096:
                 raise ValueError
-            veri = json.loads(self.rfile.read(n) or b"{}")
+            veri = json.loads(parca or b"{}")
         except (ValueError, RecursionError):
             raise ik.Reddedildi("istek okunamadı")
         if not isinstance(veri, dict):
@@ -240,6 +271,8 @@ class _Isleyici(BaseHTTPRequestHandler):
                 self._govde()
                 o.depo.bitir()
                 return self._json(200, {"tamam": True})
+        except _CokBuyuk as hata:
+            return self._json(413, {"hata": f"{hata}. Gövde en çok {GOVDE_SINIR} bayt olabilir."})
         except ik.Reddedildi as hata:
             return self._json(400, {"hata": str(hata)})
         except (TypeError, KeyError, AttributeError):

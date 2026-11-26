@@ -14,10 +14,12 @@ import urllib.request
 from pathlib import Path
 
 from tutar import insan_kayit as ik
+from tutar.hakem import hakem_metni
 from scripts import insan_puanla as sunucu
 
 DEPO = Path(__file__).resolve().parent.parent
 MODELLER = ["uydumodelbir", "uydumodeliki"]
+SABLON = DEPO / "judge" / "judge_prompt_v1.txt"  # hakem_hazirla.py ile ayni dosya
 
 
 def dunya(kok, kare=50, metin_yaz=True):
@@ -51,8 +53,10 @@ def dunya(kok, kare=50, metin_yaz=True):
         (d / "tam" / "._001.png").write_bytes(b"x")
         if metin_yaz:
             en = [k["en"] for k in komutlar if k["id"] == r["komut"]][0]
-            satir = "\n".join(f"{i}: {sid[i]['metin']}" for i in checks["komutlar"][str(r["komut"])])
-            (d / "sorular.txt").write_text(f"komut:\n{en}\nSorular:\n{satir}\n", encoding="utf-8")
+            (d / "sorular.txt").write_text(
+                hakem_metni(SABLON.read_text(encoding="utf-8"), en,
+                            [sid[i] for i in checks["komutlar"][str(r["komut"])]]),
+                encoding="utf-8")
     return secim, esleme, checks, komutlar
 
 
@@ -195,10 +199,10 @@ class OturumTest(unittest.TestCase):
 
     # ---- D3 / D4 ----
     def gercek_bicim(self, kok, klip, komut_satirlari, soru_satirlari):
-        """hakem_hazirla ciktisinin bicimi: baslik, komut, bos satir, Sorular:, kurallar."""
-        metin = ("TUTAR uydurma sablon\n\nVideoya verilen komut:\n"
-                 + "\n".join(komut_satirlari) + "\n\nSorular:\n" + "\n".join(soru_satirlari)
-                 + "\n\nKurallar:\n1. uydurma kural\n")
+        """hakem_hazirla ile ayni sablon ve islevle uretilmis metin; satirlar elle bozulabilir."""
+        metin = hakem_metni(SABLON.read_text(encoding="utf-8"), "\n".join(komut_satirlari),
+                            [tuple(l.split(": ", 1)) if ": " in l else (l, "")
+                             for l in soru_satirlari])
         (Path(kok) / "hakem_girdi" / klip / "sorular.txt").write_text(metin, encoding="utf-8")
 
     def k001_dogru(self):
@@ -262,6 +266,47 @@ class OturumTest(unittest.TestCase):
         d = dunya(kok)
         k, s = self.k001_dogru()
         self.gercek_bicim(kok, "K001", ["prefix " + k[0]], s)
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    # ---- F1: dosyanin tamami bayt bayt ----
+    def degistir(self, fn):
+        kok = Path(tempfile.mkdtemp())
+        d = dunya(kok)
+        yol = kok / "hakem_girdi" / "K001" / "sorular.txt"
+        yol.write_bytes(fn(yol.read_bytes()))
+        return kok, d
+
+    def test_degismemis_dosya_acilir(self):
+        kok = Path(tempfile.mkdtemp())
+        d = dunya(kok)
+        self.assertEqual(len(self.acilir_mi(kok, d).klipler), 3)
+
+    def test_komut_oncesine_ek_satir_acilmaz(self):
+        kok, d = self.degistir(lambda b: b.replace(b"Uydurma command two",
+                                                   b"Ek satir\nUydurma command two", 1))
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    def test_sona_ek_bolum_acilmaz(self):
+        kok, d = self.degistir(lambda b: b + b"\nEk bolum:\nuydurma\n")
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    def test_talimat_govdesinde_tek_karakter_acilmaz(self):
+        sablon = SABLON.read_bytes()
+        i = next(j for j, c in enumerate(sablon) if chr(c).isalpha())
+        kok, d = self.degistir(lambda b: b.replace(sablon[i:i + 1], b"X" if sablon[i:i + 1] != b"X" else b"Y", 1))
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    def test_satir_sonu_bosluk_acilmaz(self):
+        kok, d = self.degistir(lambda b: b.replace(b"Uydurma command two", b"Uydurma command two ", 1))
+        with self.assertRaises(ik.AracHatasi):
+            self.acilir_mi(kok, d)
+
+    def test_satir_sonu_crlf_acilmaz(self):
+        kok, d = self.degistir(lambda b: b.replace(b"\n", b"\r\n"))
         with self.assertRaises(ik.AracHatasi):
             self.acilir_mi(kok, d)
 
@@ -460,6 +505,35 @@ class SunucuTest(unittest.TestCase):
         self.assertIn("gercek", g)           # 1:1 kipi sinifi
         self.assertIn("overflow:auto", sunucu.CSS)
         self.assertIn("max-width:none", sunucu.CSS)
+
+    def test_buyuk_govde_4xx_ve_sunucu_ayakta(self):
+        import http.client
+        onceki = self.cevap.read_bytes() if self.cevap.exists() else None
+        govde = b"{" + b" " * (5 * 1024 * 1024) + b"}"
+        c = http.client.HTTPConnection("127.0.0.1", self.port, timeout=20)
+        c.request("POST", "/cevap", body=govde, headers={"Content-Type": "application/json"})
+        r = c.getresponse()
+        veri = r.read()
+        c.close()
+        self.assertIn(r.status, (400, 413))
+        self.assertIn("hata", json.loads(veri))
+        self.assertEqual(self.al("/")[0], 200)
+        sonra = self.cevap.read_bytes() if self.cevap.exists() else None
+        self.assertEqual(onceki, sonra)
+
+    def test_cok_buyuk_govde_baglanti_kapanir(self):
+        import http.client
+        c = http.client.HTTPConnection("127.0.0.1", self.port, timeout=20)
+        c.putrequest("POST", "/cevap")
+        c.putheader("Content-Type", "application/json")
+        c.putheader("Content-Length", str(200 * 1024 * 1024))
+        c.endheaders()
+        r = c.getresponse()
+        r.read()
+        c.close()
+        self.assertEqual(r.status, 413)
+        self.assertEqual(r.getheader("Connection"), "close")
+        self.assertEqual(self.al("/")[0], 200)
 
     def test_bitir_eksikse_400(self):
         durum, _, _ = self.al("/bitir", {})

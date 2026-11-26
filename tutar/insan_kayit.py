@@ -12,10 +12,13 @@ import threading
 from datetime import datetime
 from pathlib import Path
 
+from tutar.hakem import hakem_metni
+
 CEVAPLAR = ("evet", "hayir", "gorunmuyor")
 KARE_SAYISI = 50
 SURUM = "v1"
 SHA_ADI = "cevaplar.sha256"
+SABLON_YOLU = Path(__file__).resolve().parent.parent / "judge" / "judge_prompt_v1.txt"
 
 
 class AracHatasi(Exception):
@@ -56,47 +59,22 @@ def _kare_adlari(kok, klip) -> list:
     return adlar
 
 
-def _sorular_txt_ayristir(icerik):
-    """hakem_hazirla ciktisi: "Sorular:" satirindan sonraki ilk bos satira kadar "kimlik: metin"
-    satirlari; komut metni, "Sorular:" satirindan onceki bos olmayan satirlarin sonundaki blok.
-
-    Dondurur: (komut_satirlari_oncesi: list, {kimlik: metin}).
-    """
-    satirlar = icerik.split("\n")
-    idx = [i for i, l in enumerate(satirlar) if l == "Sorular:"]
-    if len(idx) != 1:
-        raise AracHatasi("sorular dosyasinda tek bir 'Sorular:' satiri olmali")
-    sorular = {}
-    for l in satirlar[idx[0] + 1:]:
-        if l == "":
-            break
-        kimlik, ayrac, metin = l.partition(": ")
-        if not ayrac or not kimlik or kimlik in sorular:
-            raise AracHatasi("sorular dosyasinda gecersiz ya da tekrar eden soru satiri")
-        sorular[kimlik] = metin
-    oncesi = satirlar[:idx[0]]
-    while oncesi and oncesi[-1] == "":
-        oncesi.pop()
-    return oncesi, sorular
+def beklenen_metin(komut_en, sorular) -> str:
+    """Hakemin gördüğü sorular.txt'nin olması gereken metni: scripts/hakem_hazirla.py ile
+    AYNI işlev (tutar.hakem.hakem_metni) ve AYNI şablon dosyası (judge/judge_prompt_v1.txt)."""
+    sablon = SABLON_YOLU.read_text(encoding="utf-8")
+    return hakem_metni(sablon, komut_en, sorular)
 
 
 def _metin_denetimi(kok, klip, komut_en, sorular):
-    """Gösterilen metin, hakemin gördüğü dosyayla (sorular.txt) TAM eşleşmeli:
-    soru kimlikleri kümesi ve her metin birebir; komut satırları tam satır."""
+    """sorular.txt, aracın gösterdiği komut ve sorulardan yeniden üretilen metinle BAYT BAYT
+    aynı olmalı. Herhangi bir fark (ek satır, ek bölüm, değişmiş talimat, boşluk) aracı açtırmaz."""
     yol = Path(kok) / "hakem_girdi" / klip / "sorular.txt"
     if not yol.is_file():
         raise AracHatasi(f"{klip}: hakemin soru dosyasi yok, metin karsilastirilamadi")
-    oncesi, hakem_sorulari = _sorular_txt_ayristir(yol.read_text(encoding="utf-8"))
-    komut_satirlari = komut_en.split("\n")
-    if oncesi[len(oncesi) - len(komut_satirlari):] != komut_satirlari or \
-            len(oncesi) < len(komut_satirlari):
-        raise AracHatasi(f"{klip}: komut metni hakemin gordugunden farkli")
-    arac = {s["id"]: s["metin"] for s in sorular}
-    if set(arac) != set(hakem_sorulari):
-        raise AracHatasi(f"{klip}: soru kimlikleri hakemin gordugunden farkli")
-    for kimlik, metin in arac.items():
-        if hakem_sorulari[kimlik] != metin:
-            raise AracHatasi(f"{klip}: soru metni hakemin gordugunden farkli ({kimlik})")
+    if yol.read_bytes() != beklenen_metin(komut_en, sorular).encode("utf-8"):
+        raise AracHatasi(f"{klip}: hakemin soru dosyasi, hakem_hazirla ciktisindan farkli "
+                         "(komut, sorular ya da talimat metni degismis)")
 
 
 def klip_sorulari(checks, komutlar, komut):
