@@ -44,6 +44,8 @@ Süreç ve dondurma kuralları için `PROTOCOL.md` dosyasına bakın.
 
 Üretimden sonra görülen sınırlar `PROTOCOL.md` içindeki "Üretimden sonra görülen sınırlar (26 Kasım 2026)" bölümünde.
 
+Hakem çalıştırma kuralları hakem çalışmadan önce `PROTOCOL.md` içinde yazıldı.
+
 ## Sonuçlar
 
 Videolar üretildi: 100 deneme, 98 klip, 2 güvenlik reddi. Hakem ve insan puanlaması henüz yapılmadı.
