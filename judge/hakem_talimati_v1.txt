@@ -16,7 +16,7 @@ Bu kurallara uyulduğu araç kaydından sonradan denetlenir. Klasör dışında 
 Cevap biçimi:
 - Cevabını metin dosyasındaki JSON biçiminde ver ve yalnız JSON'u {cikti_dosyasi} yoluna yaz.
 - Her cevapta "gerekce" tek cümle olmalı ve boş olamaz.
-- "kare" alanı 1 ile 50 arasında TAM SAYI ya da null olmalı. "yok", "-", aralık ("3-7") ya da metin yazılmaz. Dayandığın kare yoksa null yaz.
+- "kare" alanı 1 ile 50 arasında TAM SAYI ya da null olmalı. "yok", "-", aralık ("3-7") ya da metin yazılmaz. Dayandığın kare yoksa null yaz. Metin dosyasındaki örnekte kare numarası tırnak içinde görünse de tam sayı yaz; ikisi çelişirse bu talimat geçerlidir.
 
 Son mesajın iki satır olsun:
 1. Kaç soru cevapladığın.
