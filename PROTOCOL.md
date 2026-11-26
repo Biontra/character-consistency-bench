@@ -366,3 +366,7 @@ Sınırlar (kodla çözülmedi, sonuç okunurken bilinmeli):
 1. **Videoları önceden izleme.** Kaan puanlamadan önce 98 videonun yaklaşık 60-70'ini izlemişti (kendi sözü: "bi 60-70 tane izledim"). Yani puanladığı 20 klibin çoğunu büyük olasılıkla daha önce video olarak görmüştü; hangilerini gördüğü kayıtlı değil. Hakem ise yalnız kareleri gördü. Bu, insan cevaplarının karelerde görünmeyen bilgiden (hareket, ses) etkilenmiş olabileceği anlamına gelir ve bir sınırdır. Puanlama sırasında Kaan'a yalnız karelerde gördüğüne göre cevap vermesi söylenmişti.
 2. **Disk olayı sırasında kör cevap.** Kaan, kareler görünmezken cevapladığı soru kalmadığını söyledi ("yok"). Bu onun beyanıdır, ayrıca doğrulanmadı.
 3. **İkinci bağımsız kontrol.** Sonuç çıktıları için ikinci bir bağımsız kontrol yapılmadı; Kaan gerekli görmedi.
+
+## Kapalı veri seti yayını (26 Kasım 2026)
+
+Gizli dosyalar Hugging Face'e yüklendi: `Biontra/character-consistency-bench` (dataset). Erişim kapalı, elle onaylı (gated: manual); lisans yalnız değerlendirme (veri setindeki `LICENSE.md`). İçerik: 98 klip, sorular ve cevap anahtarı, başlangıç resmi, eşleme, üretim kaydı, hakem ham cevapları, insan cevapları, sonuçlar; 135 dosya. Kareler yüklenmedi (videolardan kodla yeniden çıkarılır). Yüklemeden sonra giriş yapmadan denendi: sayfa ve README açılıyor, denenen 8 gizli dosyanın hepsi 401 döndü. Erişim isteme formu ikinci bir hesapla denenmedi (doğrulanmadı). Lisans metnine bir hukukçu bakmadı.

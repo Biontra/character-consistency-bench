@@ -39,7 +39,7 @@ Input: one start image and 20 commands. The commands were written in Turkish; th
 
 ## What is private and why
 
-The questions, the answer key, the start image, the videos and the frames are private. If the questions were public, a model or provider could be tuned to their answers. These files will live in a gated (manually approved) dataset on Hugging Face. This repo holds only the code, the rules, the 20 commands, the results table, the limits and the SHA-256 fingerprints of the private files. In the open files, questions appear only by ID.
+The questions, the answer key, the start image, the videos and the frames are private. If the questions were public, a model or provider could be tuned to their answers. These files live in a gated (manually approved) dataset on Hugging Face: [Biontra/character-consistency-bench](https://huggingface.co/datasets/Biontra/character-consistency-bench). The dataset page is public; the files open only after the owner approves an access request, and the license is evaluation only. This repo holds only the code, the rules, the 20 commands, the results table, the limits and the SHA-256 fingerprints of the private files. In the open files, questions appear only by ID.
 
 See `PROTOCOL.md` for the process and the freezing rules. It is written in Turkish.
 
