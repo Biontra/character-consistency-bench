@@ -79,6 +79,68 @@ class KareCikarTest(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "Hiç kare"):
                 kare_cikar(self.klip, self.gecici / "h2")
 
+    def test_yan_dosyali_klasorde_dogru_sayi(self):
+        hedef = self.gecici / "yan"
+        ilk = kare_cikar(self.klip, hedef)
+        for k in ("tam", "ust", "alt"):
+            (hedef / k / "._001.png").write_bytes(b"yan")
+            (hedef / k / "._zzz.png").write_bytes(b"yan")
+        ikinci = kare_cikar(self.klip, hedef)
+        self.assertEqual(ikinci["kare_sayisi"], ilk["kare_sayisi"])
+        for k in ("tam", "ust", "alt"):
+            gercek = [p for p in (hedef / k).glob("*.png") if not p.name.startswith("._")]
+            self.assertEqual(len(gercek), ikinci["kare_sayisi"])
+
+    def test_yan_dosya_silinirken_hata_yok(self):
+        hedef = self.gecici / "yan2"
+        (hedef / "tam").mkdir(parents=True)
+        (hedef / "tam" / "._001.png").write_bytes(b"yan")
+        bilgi = kare_cikar(self.klip, hedef)
+        self.assertGreater(bilgi["kare_sayisi"], 0)
+
+    def test_yalniz_yan_dosya_sifir_kare_sayilir(self):
+        hedef = self.gecici / "yan3"
+        (hedef / "tam").mkdir(parents=True)
+        (hedef / "tam" / "._001.png").write_bytes(b"yan")
+        with mock.patch.object(kareler, "FFMPEG", "/usr/bin/true"):
+            with self.assertRaisesRegex(RuntimeError, "Hiç kare"):
+                kare_cikar(self.klip, hedef)
+
+    def test_ffmpegin_biraktigi_yan_dosyalar_sayilmaz(self):
+        # exFAT'te macOS yazarken ._ dosyası bırakır; sayıyı şişirmemeli.
+        hedef = self.gecici / "yan4"
+        gercek = kareler._calistir
+
+        def sahte(komut):
+            if komut[0] != kareler.FFMPEG:
+                return gercek(komut)
+            for k in ("tam", "ust", "alt"):
+                for n in (1, 2, 3):
+                    (hedef / k / f"{n:03d}.png").write_bytes(b"png")
+                    (hedef / k / f"._{n:03d}.png").write_bytes(b"yan")
+            return ""
+
+        with mock.patch.object(kareler, "_calistir", sahte):
+            bilgi = kare_cikar(self.klip, hedef)
+        self.assertEqual(bilgi["kare_sayisi"], 3)
+
+    def test_eski_yan_dosya_silinemezse_hata_yok(self):
+        # Ana dosya silinince ._ eşi de kaybolur; silmeye çalışmamalı.
+        hedef = self.gecici / "yan5"
+        (hedef / "tam").mkdir(parents=True)
+        (hedef / "tam" / "001.png").write_bytes(b"eski")
+        (hedef / "tam" / "._001.png").write_bytes(b"yan")
+        silinen = []
+        gercek_unlink = Path.unlink
+
+        def unlink(self_, *a, **k):
+            silinen.append(self_.name)
+            return gercek_unlink(self_, *a, **k)
+
+        with mock.patch.object(Path, "unlink", unlink):
+            kare_cikar(self.klip, hedef)
+        self.assertNotIn("._001.png", silinen)
+
 
 if __name__ == "__main__":
     unittest.main()

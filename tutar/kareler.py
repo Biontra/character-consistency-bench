@@ -32,6 +32,10 @@ def _bilgi(klip: Path) -> dict:
         raise RuntimeError(f"Klipte video akışı okunamadı: {klip}") from hata
 
 
+def _gercek_pngler(klasor: Path) -> list:
+    return [p for p in Path(klasor).glob("*.png") if not p.name.startswith("._")]
+
+
 def kare_cikar(klip: Path, hedef: Path, fps: int = 10) -> dict:
     klip, hedef = Path(klip), Path(hedef)
     if not klip.is_file():
@@ -40,8 +44,9 @@ def kare_cikar(klip: Path, hedef: Path, fps: int = 10) -> dict:
     for ad in ("tam", "ust", "alt"):
         (hedef / ad).mkdir(parents=True, exist_ok=True)
         # Eski çalıştırmadan kalan kareler sayıyı bozmasın.
-        for eski in (hedef / ad).glob("*.png"):
-            eski.unlink()
+        # exFAT'te macOS'un ._ yan dosyaları sayılmaz ve silinmeye çalışılmaz.
+        for eski in _gercek_pngler(hedef / ad):
+            eski.unlink(missing_ok=True)
     # Not: yükseklik tek sayıysa alttaki 1 satır iki yarıda da dışarıda kalır.
     yarim = bilgi["yukseklik"] // 2
     g = bilgi["genislik"]
@@ -56,7 +61,7 @@ def kare_cikar(klip: Path, hedef: Path, fps: int = 10) -> dict:
         "-map", "[u]", str(hedef / "ust" / "%03d.png"),
         "-map", "[d]", str(hedef / "alt" / "%03d.png"),
     ])
-    sayi = len(list((hedef / "tam").glob("*.png")))
+    sayi = len(_gercek_pngler(hedef / "tam"))
     if sayi == 0:
         raise RuntimeError(f"Hiç kare çıkmadı: {klip}")
     return {"kare_sayisi": sayi, **bilgi}
