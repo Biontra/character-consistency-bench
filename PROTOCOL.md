@@ -165,3 +165,26 @@ Bu bölüm hakem çalışmadan ÖNCE yazıldı ve commit edildi. Bu tarihte hiç
 6. **Deneme.** Önce 5 klip (K001-K005) çalıştırılır. Amaç yalnız düzeneğin çalıştığını görmektir: kareler okunuyor mu, çıktı geçerli mi. Bu 5 klibin geçerli cevapları SON cevaptır ve yeniden çalıştırılmaz. Denemeden sonra bu kurallar değişirse değişiklik ve nedeni buraya yazılır.
 7. **Kayıt.** Herkese açık `results/judge_raw.jsonl` dosyasında satır başına bir cevap bulunur: klip kodu, model, komut, soru kimliği, cevap, kare, hakem modeli, çalıştırma numarası, tarih. Soru metni ve hakemin gerekçesi bu dosyaya girmez; gerekçeli ham çıktılar gizli veri setinde kalır. Bu dosya insan puanlamasından ÖNCE commit edilir.
 8. **Üretilemeyen klipler.** Üretilemeyen iki klip (Gemini Omni komut 2 ve 7) hakeme gitmez, çünkü klip yok. Hakeme 98 klip gider.
+
+## Hakem kurallarına ekler (26 Kasım 2026, hakem çalışmadan önce, iki bağımsız okumadan sonra)
+
+Bu ek de hakem çalışmadan ÖNCE yazıldı. Hiçbir klip hakeme gösterilmedi. Yukarıdaki "Hakem çalıştırma kuralları"nı silmez; yalnız onlara ekler ve bir cümlesini düzeltir.
+
+1. **Düzeltme.** Yukarıdaki "komut numarası geçmez" cümlesi yalnız klasör ve dosya adları için doğrudur. Soru kimlikleri komut numarasını içerir ve hakem bunu görür. Komut numarası modeli ele vermez: her model aynı komutları aldı.
+2. **Metin dosyasının yeri ve körlüğün dayanağı.** Hakemin metin dosyası artık kare klasörünün içindedir (`hakem_girdi/Kxxx/sorular.txt`), deponun ve eşleme dosyasının dışında. Yine de körlük teknik bir duvarla değil talimatla korunur: alt ajanın dosya okuma aracı vardır. Bu yüzden her hakem çalıştırmasının araç kaydı sonradan taranır. Verilen klasör dışında dosya okuyan ya da 50 tam karenin hepsini açmayan çalıştırma GEÇERSİZ sayılır (çıktısı biçimce doğru olsa bile) ve bir geçersiz deneme olarak günlüğe yazılır.
+3. **Kayıt kodla tutulur.** `scripts/hakem_kaydet.py` geçerli kaydı olan klibi yeniden kaydetmez, klip başına en çok iki denemeye izin verir, ikinci geçersizde `hakem_yok` yazar ve her denemeyi günlüğe ekler. Hakemi başlatan şey kod değil, Claude Code içindeki ekip lideridir (alt ajan başlatma kodla yapılamıyor). Bu bir sınırdır: araç kaydının taranması da lider tarafından yapılır.
+4. **Çıktı doğrulamasına eklenen.** Her cevapta boş olmayan bir gerekçe (`gerekce`, metin) şarttır. Kare kuralı aynıdır: 1-50 tam sayı ya da boş.
+5. **Deneme kuralının daraltılması.** 5 kliplik denemeden sonra hakem metni, talimat ve doğrulama kuralları DEĞİŞTİRİLEMEZ. Düzenek bu metinler değişmeden çalışmıyorsa metin düzeltilir, yeni sürüm numarası alır ve 98 klibin HEPSİ yeni sürümle baştan çalıştırılır. Eski deneme cevapları silinmez; "atıldı" diye ayrı yayımlanır. Deneme ile kalan klipler arasında eşlemeye ve puanlara bakılmaz.
+6. **Ham cevapların saklanması.** Ham cevaplar hakemler bitene kadar deponun dışında ya da gizli tutulur (`secret/hakem/`). `results/judge_raw.jsonl` ancak 98 klip tamamlanınca üretilir (`scripts/hakem_kaydet.py topla`), çünkü içinde kod-model eşlemesi vardır.
+
+### Hakemle ilgili bilinen sınırlar
+
+- (a) Hakem başlangıç resmini görmez, klibin ilk karesini ölçü alır. Karakteri daha ilk karede değiştirip sonra sabit tutan model bu yüzden "karakteri tuttu" sütununda cezalandırılmaz. İlk kare farkı tablosu (`uretim_kaydi/ilk_kare_farki.json`) bu yüzden sonuçla yan yana okunmalıdır.
+- (b) `gorunmuyor` ve `hakem_yok` paydaya girmez. Bulanık ya da kararsız görüntü üreten model bundan yarar görebilir. Sonuç tablosunda model başına bu iki cevabın sayısı ayrıca verilecektir.
+- (c) Tek çalıştırma: hakemin aynı klipte ikinci kez aynı cevabı verip vermeyeceği ölçülmedi.
+- (d) Bir klibin bütün soruları tek seferde cevaplanır. Bir cevabın diğerini etkilemesi engellenemez.
+- (e) Üst ve alt kırpmalara bakmak isteğe bağlıdır. Klipler arasında bakma derinliği eşit olmayabilir.
+- (f) 50 kare birkaç parçada okunur. İlk karelerin ayrıntısı sonlara doğru zayıflayabilir.
+- (g) Saniyede 10 kare: iki kare arasındaki (yaklaşık 0,1 sn) kısa bozulmalar kaçabilir. 24 fps kliplerde kareler arası adım eşit değildir (2-3 kare), 30 fps klipte eşittir (3 kare).
+- (h) Dosya adlarında ipucu yok ama görüntünün kendisi modeli ele verebilir (çizim farkı, hareket akıcılığı). PNG dosyalarının metin içermeyen yardımcı parçaları iki modelde farklıdır.
+- (i) 20 klibi puanlayacak insan bu projenin sahibidir: videoları o üretti, bu belgedeki sınırları biliyor. Model adını görmeden puanlar ama tam kör sayılmaz.
