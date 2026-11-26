@@ -2,13 +2,21 @@
 
 Kullanım:
   python3 scripts/hakem_kaydet.py kaydet KOD --cikti DOSYA --hakem-modeli AD --tarih YYYY-AA-GG
-  python3 scripts/hakem_kaydet.py durum
-  python3 scripts/hakem_kaydet.py topla
+        (--tarama-temiz | --tarama-gecersiz "NEDEN") [--surum v1]
+  python3 scripts/hakem_kaydet.py durum [--surum v1]
+  python3 scripts/hakem_kaydet.py topla [--surum v1]
+
+kaydet için tarama sonucu ZORUNLUDUR (araç kaydı taraması betikten önce yapılır):
+  --tarama-temiz            tarama temiz, çıktı biçimce doğruysa geçerli sayılır
+  --tarama-gecersiz "NEDEN" tarama sorun buldu, deneme geçersiz sayılır
+İkisi birden ya da hiçbiri verilirse betik hata verir ve hiçbir şey yazmaz.
+Kayıtlar secret/hakem/<sürüm>/ altındadır (varsayılan v1); deneme sayacı sürüm başınadır.
 
 kaydet çıkış kodları: 0 geçerli kayıt,
   1 çıktı geçersiz, günlüğe yazıldı (1. denemeyse bir kez daha çalıştırılabilir;
     2. denemeyse klibin cevapları hakem_yok yazıldı),
   2 kural gereği reddedildi, hiçbir şey yazılmadı.
+Seçenek hatası (tarama seçeneği yok/çift) argparse çıkış kodu 2 ile biter, hiçbir şey yazılmaz.
 Gizli yollar (secret/hakem/..., secret/checks.json) varsayılan; testler için
 --hakem-dizin, --checks, --sonuc ile değiştirilebilir.
 """
@@ -33,14 +41,24 @@ def main(argv=None):
     k.add_argument("--cikti", required=True)
     k.add_argument("--hakem-modeli", required=True)
     k.add_argument("--tarih", required=True)
-    alt.add_parser("durum")
-    alt.add_parser("topla")
+    t = k.add_mutually_exclusive_group(required=True)
+    t.add_argument("--tarama-temiz", action="store_true")
+    t.add_argument("--tarama-gecersiz", metavar="NEDEN")
+    d = alt.add_parser("durum")
+    tp = alt.add_parser("topla")
+    for sp in (k, d, tp):
+        sp.add_argument("--surum", default=hk.VARSAYILAN_SURUM)
     a = ap.parse_args(argv)
+    if a.komut == "kaydet" and a.tarama_gecersiz is not None and not a.tarama_gecersiz.strip():
+        ap.error("--tarama-gecersiz icin NEDEN bos olamaz")
 
     try:
         if a.komut == "kaydet":
-            r = hk.kaydet(a.kod, a.cikti, a.hakem_modeli, a.tarih, a.hakem_dizin, a.checks)
+            r = hk.kaydet(a.kod, a.cikti, a.hakem_modeli, a.tarih, a.hakem_dizin, a.checks,
+                         tarama_hatasi=a.tarama_gecersiz, surum=a.surum)
             print(f"{a.kod}: calistirma {r['calistirma']}, durum {r['durum']}")
+            if r["tarama_hatasi"] is not None:
+                print(f"  tarama gecersiz: {r['tarama_hatasi']}")
             for h in r["hatalar"]:
                 print(f"  hata: {h}")
             if r["durum"] == "gecersiz":
@@ -49,14 +67,15 @@ def main(argv=None):
                 print(f"{a.kod}: ikinci deneme de gecersiz, cevaplar hakem_yok yazildi")
             return 0 if r["durum"] == "gecerli" else 1
         if a.komut == "durum":
-            d = hk.durum(a.hakem_dizin, a.checks)
+            d = hk.durum(a.hakem_dizin, a.checks, surum=a.surum)
             for ad, baslik in (("gecerli", "gecerli"),
                                ("bir_gecersiz_bekliyor", "1 gecersiz deneme bekliyor"),
                                ("hakem_yok", "hakem_yok"),
                                ("hic_calismadi", "hic calismadi")):
                 print(f"{baslik}: {len(d[ad])}  {' '.join(d[ad])}")
             return 0
-        n = hk.topla(a.hakem_dizin, a.checks, a.sonuc, beklenen_satir=hk.BEKLENEN_SATIR)
+        n = hk.topla(a.hakem_dizin, a.checks, a.sonuc, beklenen_satir=hk.BEKLENEN_SATIR,
+                  surum=a.surum)
         print(f"{a.sonuc}: {n} satir")
         return 0
     except hk.KayitReddi as hata:
