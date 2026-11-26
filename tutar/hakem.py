@@ -88,18 +88,31 @@ def cikti_dogrula(cikti, soru_kimlikleri) -> list:
             hatalar.append(f"{k}: gecersiz cevap {c!r}")
         if not _kare_gecerli(o.get("kare")):
             hatalar.append(f"{k}: gecersiz kare {o.get('kare')!r}")
+        g = o.get("gerekce")
+        if not isinstance(g, str) or not g.strip():
+            hatalar.append(f"{k}: gerekce bos ya da metin degil")
     return hatalar
 
 
-def ham_satirlar(klip, model, komut, cikti, hakem_modeli, calistirma, tarih) -> list:
-    """Geçerli çıktıdan judge_raw satırları üretir. Gerekçe ve soru metni girmez."""
+_SATIR_ALANLARI = ("klip", "model", "komut", "soru", "cevap", "kare",
+                   "hakem_modeli", "calistirma", "tarih")
+
+
+def ham_satirlar(klip, model, komut, cikti, soru_kimlikleri, hakem_modeli,
+                 calistirma, tarih) -> list:
+    """Geçerli çıktıdan judge_raw satırları üretir. Gerekçe ve soru metni girmez.
+
+    Beklenen soru kimlikleri dışarıdan gelir (çıktının kendisinden alınmaz).
+    """
+    soru_kimlikleri = list(soru_kimlikleri)
+    hatalar = cikti_dogrula(cikti, soru_kimlikleri)
+    if hatalar or not soru_kimlikleri:
+        raise ValueError(f"gecersiz cikti: {hatalar or 'soru listesi bos'}")
     if isinstance(cikti, (str, bytes)):
         cikti = json.loads(cikti)
-    hatalar = cikti_dogrula(cikti, list(cikti.get("cevaplar", {})) if isinstance(cikti, dict) else [])
-    if hatalar or not cikti["cevaplar"]:
-        raise ValueError(f"gecersiz cikti: {hatalar or 'cevap yok'}")
     satirlar = []
-    for kimlik, o in cikti["cevaplar"].items():
+    for kimlik in soru_kimlikleri:
+        o = cikti["cevaplar"][kimlik]
         kare = o.get("kare")
         kare = None if kare in (None, "") else int(kare)
         satirlar.append({
@@ -108,6 +121,19 @@ def ham_satirlar(klip, model, komut, cikti, hakem_modeli, calistirma, tarih) -> 
             "calistirma": calistirma, "tarih": tarih,
         })
     return satirlar
+
+
+def hakem_yok_satirlari(klip, model, komut, soru_kimlikleri, hakem_modeli,
+                        calistirma, tarih) -> list:
+    """İki geçersiz çalıştırmadan sonra: her soru için hakem_yok, kare yok."""
+    soru_kimlikleri = list(soru_kimlikleri)
+    if not soru_kimlikleri:
+        raise ValueError("soru listesi bos")
+    return [{
+        "klip": klip, "model": model, "komut": komut, "soru": kimlik,
+        "cevap": "hakem_yok", "kare": None, "hakem_modeli": hakem_modeli,
+        "calistirma": calistirma, "tarih": tarih,
+    } for kimlik in soru_kimlikleri]
 
 
 def _sha(yol: Path) -> str:

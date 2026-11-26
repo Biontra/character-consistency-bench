@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from tutar import hakem
-from tutar.hakem import (cikti_dogrula, ham_satirlar, hakem_metni,
+from tutar.hakem import (cikti_dogrula, ham_satirlar, hakem_metni, hakem_yok_satirlari,
                          klip_kodlari, kare_kopyala)
 
 SABLON = 'Komut: {komut_en}\nSorular:\n{sorular}\nCikti: {\n "cevaplar": {"<id>": {"cevap": "x"}}\n}\n'
@@ -108,7 +108,7 @@ class HamSatirTest(unittest.TestCase):
     def test_satirlar_gerekce_icermez(self):
         c = gecerli(["a1", "a2"])
         c["cevaplar"]["a1"]["gerekce"] = "GIZLI-GEREKCE"
-        s = ham_satirlar("K001", "m", 3, c, "claude-sonnet", 1, "2026-11-26")
+        s = ham_satirlar("K001", "m", 3, c, ["a1", "a2"], "claude-sonnet", 1, "2026-11-26")
         self.assertEqual([r["soru"] for r in s], ["a1", "a2"])
         self.assertEqual(set(s[0]), {"klip", "model", "komut", "soru", "cevap", "kare",
                                      "hakem_modeli", "calistirma", "tarih"})
@@ -118,15 +118,80 @@ class HamSatirTest(unittest.TestCase):
 
     def test_bos_kare_none(self):
         c = gecerli(["a1"], kare="")
-        self.assertIsNone(ham_satirlar("K001", "m", 3, c, "x", 1, "t")[0]["kare"])
+        self.assertIsNone(ham_satirlar("K001", "m", 3, c, ["a1"], "x", 1, "t")[0]["kare"])
 
     def test_gecersiz_cikti_hata(self):
         with self.assertRaises(ValueError):
-            ham_satirlar("K001", "m", 3, {"cevaplar": {}}, "x", 1, "t")
+            ham_satirlar("K001", "m", 3, {"cevaplar": {}}, ["a1"], "x", 1, "t")
 
     def test_kare_metin_ise_int(self):
         c = gecerli(["a1"], kare="7")
-        self.assertEqual(ham_satirlar("K001", "m", 3, c, "x", 1, "t")[0]["kare"], 7)
+        self.assertEqual(ham_satirlar("K001", "m", 3, c, ["a1"], "x", 1, "t")[0]["kare"], 7)
+
+
+class HamSatirDogrulamaTest(unittest.TestCase):
+    def test_uydurma_kimlik_hata(self):
+        c = gecerli(["x1", "x2"])
+        with self.assertRaises(ValueError):
+            ham_satirlar("K001", "m", 3, c, ["a1", "a2"], "x", 1, "t")
+
+    def test_eksik_kimlik_hata(self):
+        c = gecerli(["a1"])
+        with self.assertRaises(ValueError):
+            ham_satirlar("K001", "m", 3, c, ["a1", "a2"], "x", 1, "t")
+
+    def test_fazla_kimlik_hata(self):
+        c = gecerli(["a1", "a2", "a3"])
+        with self.assertRaises(ValueError):
+            ham_satirlar("K001", "m", 3, c, ["a1", "a2"], "x", 1, "t")
+
+    def test_bos_gerekce_hata(self):
+        c = gecerli(["a1"])
+        c["cevaplar"]["a1"]["gerekce"] = " "
+        with self.assertRaises(ValueError):
+            ham_satirlar("K001", "m", 3, c, ["a1"], "x", 1, "t")
+
+    def test_json_metni_ve_sira(self):
+        s = ham_satirlar("K001", "m", 3, json.dumps(gecerli(["a2", "a1"])), ["a1", "a2"], "x", 2, "t")
+        self.assertEqual([r["soru"] for r in s], ["a1", "a2"])
+        self.assertEqual(s[0]["calistirma"], 2)
+
+
+class GerekceTest(unittest.TestCase):
+    IDLER = ["a1", "a2"]
+
+    def test_gerekce_zorunlu(self):
+        for g in (None, "", "   ", 5, ["x"], {}):
+            c = gecerli(self.IDLER)
+            c["cevaplar"]["a1"]["gerekce"] = g
+            h = cikti_dogrula(c, self.IDLER)
+            self.assertTrue(any("a1" in e and "gerekce" in e for e in h), repr(g))
+
+    def test_gerekce_alani_yok(self):
+        c = gecerli(self.IDLER)
+        del c["cevaplar"]["a2"]["gerekce"]
+        self.assertTrue(any("a2" in e and "gerekce" in e for e in cikti_dogrula(c, self.IDLER)))
+
+    def test_kare_kurali_ayni(self):
+        for k in (1, 50, None, "", "7"):
+            self.assertEqual(cikti_dogrula(gecerli(self.IDLER, kare=k), self.IDLER), [])
+        for k in ("yok", "-", "1-5", 0, 51, 2.5, True):
+            self.assertTrue(cikti_dogrula(gecerli(self.IDLER, kare=k), self.IDLER), repr(k))
+
+
+class HakemYokTest(unittest.TestCase):
+    def test_satirlar(self):
+        s = hakem_yok_satirlari("K007", "m", 4, ["a1", "a2"], "claude-sonnet", 2, "2026-11-26")
+        self.assertEqual([r["soru"] for r in s], ["a1", "a2"])
+        self.assertTrue(all(r["cevap"] == "hakem_yok" and r["kare"] is None for r in s))
+        self.assertEqual(set(s[0]), {"klip", "model", "komut", "soru", "cevap", "kare",
+                                     "hakem_modeli", "calistirma", "tarih"})
+        self.assertEqual((s[0]["klip"], s[0]["model"], s[0]["komut"], s[0]["calistirma"]),
+                         ("K007", "m", 4, 2))
+
+    def test_bos_liste_hata(self):
+        with self.assertRaises(ValueError):
+            hakem_yok_satirlari("K007", "m", 4, [], "x", 2, "t")
 
 
 class KopyaTest(unittest.TestCase):
