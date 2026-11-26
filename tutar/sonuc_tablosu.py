@@ -92,6 +92,14 @@ def _pay_payda(pay, payda):
     return {"pay": pay, "payda": payda}
 
 
+def _kredi_kontrol(mid, m):
+    if "kredi_teklif" not in m or m["kredi_teklif"] is None:
+        raise ValueError(f"{mid}: kredi alanı eksik ya da sayı değil")
+    kredi_klip = m["kredi_teklif"]
+    if isinstance(kredi_klip, bool) or not isinstance(kredi_klip, (int, float)) or kredi_klip < 0:
+        raise ValueError(f"{mid}: kredi alanı sayı değil ya da negatif ({kredi_klip!r})")
+
+
 def hesapla(checks, hakem_satirlari, uretilemeyen, modeller):
     """Model başına sonuç tablosu girdisi.
 
@@ -107,6 +115,8 @@ def hesapla(checks, hakem_satirlari, uretilemeyen, modeller):
     model_idleri = [m["id"] for m in modeller]
     if len(set(model_idleri)) != len(model_idleri) or not model_idleri:
         raise ValueError("model listesi bos ya da tekrarli")
+    for m in modeller:
+        _kredi_kontrol(m["id"], m)
     komutlar = _komut_listesi(checks)
     komut_kumesi = set(komutlar)
     tanim = _soru_tanimlari(checks)
@@ -157,9 +167,11 @@ def hesapla(checks, hakem_satirlari, uretilemeyen, modeller):
             raise ValueError(f"{mid}: uretim hatasi olan klibin kredi iadesi bilinmiyor")
         kredi_klip = m.get("kredi_teklif")
         kredi_toplam = None if kredi_klip is None else kredi_klip * (len(komutlar) - iade)
+        puanlanan_klip = ozet["uretti"] - len(tumu_hakem_yok[mid])
+        kredi_puanlanan = None if kredi_klip is None else kredi_klip * puanlanan_klip
 
-        def bol(pay):
-            return None if kredi_toplam is None or pay == 0 else kredi_toplam / pay
+        def bol(pay, toplam=kredi_toplam):
+            return None if toplam is None or pay == 0 else toplam / pay
 
         modeller_cikti.append({
             "model": mid,
@@ -175,7 +187,7 @@ def hesapla(checks, hakem_satirlari, uretilemeyen, modeller):
             "hakem_yok": ozet["disarida"]["hakem_yok"],
             "gecersiz": ozet["disarida"]["gecersiz"],
             "olculemeyen_klip": ozet["olculemeyen_klip"],
-            "hakemin_puanladigi_klip": ozet["uretti"] - len(tumu_hakem_yok[mid]),
+            "hakemin_puanladigi_klip": puanlanan_klip,
             "tumu_hakem_yok_klip": len(tumu_hakem_yok[mid]),
             "kredi": {
                 "klip_basina_teklif": kredi_klip,
@@ -183,6 +195,9 @@ def hesapla(checks, hakem_satirlari, uretilemeyen, modeller):
                 "toplam": kredi_toplam,
                 "yapan_cevap_basina": bol(yapti[0]),
                 "tutan_cevap_basina": bol(tuttu[0]),
+                "puanlanan_toplam": kredi_puanlanan,
+                "puanlanan_yapan_cevap_basina": bol(yapti[0], kredi_puanlanan),
+                "puanlanan_tutan_cevap_basina": bol(tuttu[0], kredi_puanlanan),
             },
         })
 

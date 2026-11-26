@@ -126,6 +126,17 @@ class ElleHesap(unittest.TestCase):
         self.assertAlmostEqual(b["tutan_cevap_basina"], 10)
         self.assertAlmostEqual(c["tutan_cevap_basina"], 7.5)
 
+    def test_puanlanan_kredi_tumu_hakem_yok_cikarilir(self):
+        a, b, c = (model(self.s, x)["kredi"] for x in "ABC")
+        # A: 4 klip puanlandi (4 * 5 = 20), B: 3 klip puanlandi (1 tumu hakem_yok, 3 * 7.5 = 22.5), C: 3 klip puanlandi (3 * 10 = 30)
+        self.assertEqual((a["puanlanan_toplam"], b["puanlanan_toplam"], c["puanlanan_toplam"]), (20, 22.5, 30))
+        self.assertAlmostEqual(a["puanlanan_yapan_cevap_basina"], 10)
+        self.assertAlmostEqual(a["puanlanan_tutan_cevap_basina"], 20 / 7)
+        self.assertAlmostEqual(b["puanlanan_yapan_cevap_basina"], 22.5 / 2)
+        self.assertAlmostEqual(b["puanlanan_tutan_cevap_basina"], 22.5 / 3)
+        self.assertAlmostEqual(c["puanlanan_yapan_cevap_basina"], 15)
+        self.assertAlmostEqual(c["puanlanan_tutan_cevap_basina"], 7.5)
+
     def test_pay_sifirsa_kredi_basina_none(self):
         cevap = copy.deepcopy(CEVAP)
         cevap[("A", 1)].update(y1="hayir")  # y1 yanlis, g1 gecersiz
@@ -134,6 +145,7 @@ class ElleHesap(unittest.TestCase):
         a = model(hesap(hakem_satirlari=satirlar(cevap)), "A")
         self.assertEqual(a["yapti"]["pay"], 0)
         self.assertIsNone(a["kredi"]["yapan_cevap_basina"])
+        self.assertIsNone(a["kredi"]["puanlanan_yapan_cevap_basina"])
 
 
 class Belirlenimlilik(unittest.TestCase):
@@ -202,6 +214,17 @@ class Hatalar(unittest.TestCase):
         eksik = dict(CHECKS, sorular=CHECKS["sorular"][:-1])
         with self.assertRaisesRegex(ValueError, "soru tanimi yok"):
             hesap(checks=eksik)
+
+    def test_kredi_sayisal_degil_veya_negatif_hata(self):
+        for kotu in (-1, -0.5, "10", None, True, False):
+            with self.subTest(kotu=kotu):
+                m = copy.deepcopy(MODELLER)
+                m[0]["kredi_teklif"] = kotu
+                with self.assertRaisesRegex(ValueError, "kredi"):
+                    hesap(modeller=m)
+        m_eksik = [{"id": "A", "ad": "Model A"}] + copy.deepcopy(MODELLER[1:])
+        with self.assertRaisesRegex(ValueError, "kredi"):
+            hesap(modeller=m_eksik)
 
 
 class OrtakYok(unittest.TestCase):
