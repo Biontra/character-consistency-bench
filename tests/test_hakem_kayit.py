@@ -81,8 +81,9 @@ class KaydetTest(Ortam):
 
     def test_iki_gecersiz_hakem_yok(self):
         kotu = self.dosya("k.json", cikti(["a1", "a2"], gerekce=""))
+        kotu2 = self.dosya("k2.json", cikti(["a1"], gerekce=""))  # ikinci deneme baska icerik
         self.kaydet("K001", kotu)
-        r = self.kaydet("K001", kotu)
+        r = self.kaydet("K001", kotu2)
         self.assertEqual(r["durum"], "hakem_yok")
         satir = [json.loads(s) for s in (self.hakem / "v1" / "ham" / "K001.jsonl").read_text().splitlines()]
         self.assertEqual([x["cevap"] for x in satir], ["hakem_yok"] * 2)
@@ -91,7 +92,7 @@ class KaydetTest(Ortam):
     def test_ucuncu_deneme_reddi(self):
         kotu = self.dosya("k.json", cikti(["a1"]))
         self.kaydet("K001", kotu)
-        self.kaydet("K001", kotu)
+        self.kaydet("K001", self.dosya("k2.json", cikti(["a2"])))
         once = (self.hakem / "v1" / "gunluk.jsonl").read_text()
         iyi = self.dosya("i.json", cikti(["a1", "a2"]))
         with self.assertRaises(hk.KayitReddi):
@@ -121,6 +122,58 @@ class KaydetTest(Ortam):
         self.assertEqual(r["durum"], "gecerli")
 
 
+class BayatCiktiTest(Ortam):
+    def test_ayni_dosya_ikinci_kez_reddedilir(self):
+        kotu = self.dosya("k.json", cikti(["a1"]))
+        self.assertEqual(self.kaydet("K001", kotu)["durum"], "gecersiz")
+        gunluk_once = (self.hakem / "v1" / "gunluk.jsonl").read_text()
+        cikti_dizin = self.hakem / "v1" / "cikti"
+        kopyalar_once = sorted(p.name for p in cikti_dizin.iterdir())
+        with self.assertRaises(hk.KayitReddi):
+            self.kaydet("K001", kotu)
+        self.assertEqual((self.hakem / "v1" / "gunluk.jsonl").read_text(), gunluk_once)
+        self.assertEqual(sorted(p.name for p in cikti_dizin.iterdir()), kopyalar_once)
+        self.assertFalse((self.hakem / "v1" / "ham" / "K001.jsonl").exists())
+        self.assertEqual(len(self.gunluk()), 1)  # deneme sayılmadı
+
+    def test_ayni_icerik_baska_dosya_adiyla_da_reddedilir(self):
+        self.kaydet("K001", self.dosya("k.json", cikti(["a1"])))
+        with self.assertRaises(hk.KayitReddi):
+            self.kaydet("K001", self.dosya("baska_ad.json", cikti(["a1"])))
+        self.assertEqual(len(self.gunluk()), 1)
+
+    def test_tarama_gecersiz_denemenin_ciktisi_da_bayat_sayilir(self):
+        iyi = self.dosya("i.json", cikti(["a1", "a2"]))
+        self.kaydet("K001", iyi, tarama_hatasi="dis dosya okudu")
+        with self.assertRaises(hk.KayitReddi):
+            self.kaydet("K001", iyi)
+        self.assertEqual(len(self.gunluk()), 1)
+        self.assertFalse((self.hakem / "v1" / "ham" / "K001.jsonl").exists())
+
+    def test_farkli_icerik_normal_akis(self):
+        self.kaydet("K001", self.dosya("k.json", cikti(["a1"])))
+        r = self.kaydet("K001", self.dosya("i.json", cikti(["a1", "a2"])))
+        self.assertEqual((r["durum"], r["calistirma"]), ("gecerli", 2))
+
+    def test_baska_klibin_ayni_ciktisi_etkilenmez(self):
+        ayni = self.dosya("c.json", cikti(["a1", "a2"]))
+        self.kaydet("K001", ayni)
+        # K002'nin soruları farklı: aynı bayt başka klip için yine de ayrı denetlenir
+        self.assertEqual(self.kaydet("K002", self.dosya("d.json", cikti(["b1", "b2", "b3"])))["durum"],
+                         "gecerli")
+
+    def test_bayat_kontrol_surum_basina(self):
+        kotu = self.dosya("k.json", cikti(["a1"]))
+        self.kaydet("K001", kotu)
+        r = self.kaydet("K001", kotu, surum="v2")
+        self.assertEqual((r["durum"], r["calistirma"]), ("gecersiz", 1))
+
+    def test_okunamayan_dosya_bayat_sayilmaz(self):
+        self.kaydet("K001", self.t / "yok.json")
+        r = self.kaydet("K001", self.t / "yok.json")
+        self.assertEqual((r["durum"], r["calistirma"]), ("hakem_yok", 2))
+
+
 class DurumToplaTest(Ortam):
     def test_durum(self):
         self.assertEqual(hk.durum(self.hakem, self.checks)["hic_calismadi"], ["K001", "K002"])
@@ -129,7 +182,7 @@ class DurumToplaTest(Ortam):
         self.assertEqual(d["bir_gecersiz_bekliyor"], ["K001"])
         self.kaydet("K001", self.dosya("i.json", cikti(["a1", "a2"])))
         self.kaydet("K002", self.dosya("k2.json", cikti(["b1"])))
-        self.kaydet("K002", self.dosya("k2.json", cikti(["b1"])))
+        self.kaydet("K002", self.dosya("k3.json", cikti(["b2"])))
         d = hk.durum(self.hakem, self.checks)
         self.assertEqual((d["gecerli"], d["hakem_yok"], d["hic_calismadi"]), (["K001"], ["K002"], []))
 
@@ -176,7 +229,8 @@ class TaramaTest(Ortam):
 
     def test_tarama_hatali_sonra_temiz_calistirma_2(self):
         iyi = self.dosya("i.json", cikti(["a1", "a2"]))
-        self.kaydet("K001", iyi, tarama_hatasi="50 kare acilmadi")
+        self.kaydet("K001", self.dosya("once.json", cikti(["a1", "a2"], gerekce="x")),
+                    tarama_hatasi="50 kare acilmadi")
         r = self.kaydet("K001", iyi)
         self.assertEqual((r["durum"], r["calistirma"]), ("gecerli", 2))
         self.assertTrue((self.hakem / "v1" / "ham" / "K001.jsonl").exists())
@@ -186,7 +240,8 @@ class TaramaTest(Ortam):
 
     def test_iki_tarama_hatasi_hakem_yok(self):
         iyi = self.dosya("i.json", cikti(["a1", "a2"]))
-        self.kaydet("K001", iyi, tarama_hatasi="bir")
+        self.kaydet("K001", self.dosya("i1.json", cikti(["a1", "a2"], gerekce="x")),
+                    tarama_hatasi="bir")
         r = self.kaydet("K001", iyi, tarama_hatasi="iki")
         self.assertEqual((r["durum"], r["calistirma"]), ("hakem_yok", 2))
         satir = [json.loads(s) for s in (self.hakem / "v1" / "ham" / "K001.jsonl").read_text().splitlines()]
@@ -194,7 +249,8 @@ class TaramaTest(Ortam):
 
     def test_tarama_hatali_ucuncu_deneme_reddi(self):
         iyi = self.dosya("i.json", cikti(["a1", "a2"]))
-        self.kaydet("K001", iyi, tarama_hatasi="bir")
+        self.kaydet("K001", self.dosya("i1.json", cikti(["a1", "a2"], gerekce="x")),
+                    tarama_hatasi="bir")
         self.kaydet("K001", iyi, tarama_hatasi="iki")
         with self.assertRaises(hk.KayitReddi):
             self.kaydet("K001", iyi)
@@ -236,7 +292,7 @@ class SurumTest(Ortam):
     def test_sayac_surum_basina(self):
         kotu = self.dosya("k.json", cikti(["a1"]))
         self.kaydet("K001", kotu)
-        self.kaydet("K001", kotu)
+        self.kaydet("K001", self.dosya("k2.json", cikti(["a2"])))
         r = hk.kaydet("K001", kotu, "hm", "2026-11-28", self.hakem, self.checks, surum="v2")
         self.assertEqual((r["durum"], r["calistirma"]), ("gecersiz", 1))
 
@@ -297,7 +353,8 @@ class BetikTest(Ortam):
 
     def test_gecersiz_sonra_temiz(self):
         d = self.dosya("i.json", cikti(["a1", "a2"]))
-        r1 = self.calistir(*self.kaydet_args("K001", d, "--tarama-gecersiz", "dis dosya"))
+        d1 = self.dosya("i1.json", cikti(["a1", "a2"], gerekce="x"))
+        r1 = self.calistir(*self.kaydet_args("K001", d1, "--tarama-gecersiz", "dis dosya"))
         self.assertEqual(r1.returncode, 1)
         r2 = self.calistir(*self.kaydet_args("K001", d, "--tarama-temiz"))
         self.assertEqual(r2.returncode, 0)

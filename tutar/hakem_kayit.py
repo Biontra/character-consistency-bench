@@ -5,7 +5,8 @@ Kurallar: geçerli kaydı olan klip yeniden kaydedilmez; klip başına en çok i
 deneme; ikinci geçersizde hakem_yok yazılır; her deneme günlüğe eklenir.
 Kayıtlar sürüm klasöründe tutulur (<hakem_dizin>/<sürüm>/); sayaç sürüm başınadır.
 Araç kaydı taraması geçersiz bulunduysa (tarama_hatasi) çıktı biçimce doğru olsa
-bile deneme geçersizdir. esleme.json sürüm klasörünün dışında, hakem_dizin içindedir.
+bile deneme geçersizdir. Çıktı dosyasının sha256'sı aynı klibin (aynı sürümde) önceki
+bir denemesininkiyle aynıysa kayıt reddedilir (bayat çıktı dosyası koruması). esleme.json sürüm klasörünün dışında, hakem_dizin içindedir.
 """
 import hashlib
 import json
@@ -92,6 +93,10 @@ def kaydet(kod, cikti_yolu, hakem_modeli, tarih, hakem_dizin, checks_yolu,
         sha = hashlib.sha256(veri).hexdigest()
     except OSError as hata:
         hatalar = [f"cikti dosyasi okunamadi: {hata.__class__.__name__}"]
+    if sha is not None and any(g.get("cikti_sha256") == sha for g in onceki):
+        # Bayat dosya koruması: aynı klibin (aynı sürümde) önceki bir denemesiyle
+        # birebir aynı çıktı yeni cevap sayılmaz. Hiçbir şey yazılmaz, deneme sayılmaz.
+        raise KayitReddi(f"{kod}: cikti dosyasi onceki bir denemeyle birebir ayni (bayat dosya)")
     if veri is not None:
         try:
             metin = veri.decode("utf-8")
