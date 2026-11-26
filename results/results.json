@@ -1,0 +1,350 @@
+{
+  "komut_sayisi": 20,
+  "modeller": [
+    {
+      "ad": "Kling 3.0",
+      "gecersiz": 0,
+      "gorunmuyor": 1,
+      "hakem_yok": 19,
+      "hakemin_puanladigi_klip": 19,
+      "kredi": {
+        "iade_edilen_klip": 0,
+        "klip_basina_teklif": 7.5,
+        "puanlanan_toplam": 142.5,
+        "puanlanan_tutan_cevap_basina": 0.5610236220472441,
+        "puanlanan_yapan_cevap_basina": 6.785714285714286,
+        "toplam": 150.0,
+        "tutan_cevap_basina": 0.5905511811023622,
+        "yapan_cevap_basina": 7.142857142857143
+      },
+      "model": "kling3_0",
+      "olculemeyen_klip": 1,
+      "ortak_tuttu": {
+        "pay": 228,
+        "payda": 271,
+        "yuzde": 84.13284132841329
+      },
+      "toplam_klip": 20,
+      "tumu_hakem_yok_klip": 1,
+      "tur": {
+        "grup": {
+          "pay": 33,
+          "payda": 39,
+          "yuzde": 84.61538461538461
+        },
+        "ortak": {
+          "pay": 178,
+          "payda": 208,
+          "yuzde": 85.57692307692307
+        },
+        "ozel": {
+          "pay": 46,
+          "payda": 58,
+          "yuzde": 79.3103448275862
+        }
+      },
+      "tuttu": {
+        "pay": 254,
+        "payda": 302,
+        "yuzde": 84.10596026490066
+      },
+      "uretti": 20,
+      "yapti": {
+        "pay": 21,
+        "payda": 21,
+        "yuzde": 100.0
+      }
+    },
+    {
+      "ad": "Wan 3.0",
+      "gecersiz": 11,
+      "gorunmuyor": 1,
+      "hakem_yok": 4,
+      "hakemin_puanladigi_klip": 20,
+      "kredi": {
+        "iade_edilen_klip": 0,
+        "klip_basina_teklif": 7.5,
+        "puanlanan_toplam": 150.0,
+        "puanlanan_tutan_cevap_basina": 0.5338078291814946,
+        "puanlanan_yapan_cevap_basina": 7.5,
+        "toplam": 150.0,
+        "tutan_cevap_basina": 0.5338078291814946,
+        "yapan_cevap_basina": 7.5
+      },
+      "model": "wan3_0",
+      "olculemeyen_klip": 0,
+      "ortak_tuttu": {
+        "pay": 252,
+        "payda": 275,
+        "yuzde": 91.63636363636364
+      },
+      "toplam_klip": 20,
+      "tumu_hakem_yok_klip": 0,
+      "tur": {
+        "grup": {
+          "pay": 31,
+          "payda": 33,
+          "yuzde": 93.93939393939394
+        },
+        "ortak": {
+          "pay": 203,
+          "payda": 218,
+          "yuzde": 93.11926605504587
+        },
+        "ozel": {
+          "pay": 49,
+          "payda": 57,
+          "yuzde": 85.96491228070175
+        }
+      },
+      "tuttu": {
+        "pay": 281,
+        "payda": 305,
+        "yuzde": 92.1311475409836
+      },
+      "uretti": 20,
+      "yapti": {
+        "pay": 20,
+        "payda": 22,
+        "yuzde": 90.9090909090909
+      }
+    },
+    {
+      "ad": "Seedance 2.0 Mini",
+      "gecersiz": 8,
+      "gorunmuyor": 3,
+      "hakem_yok": 6,
+      "hakemin_puanladigi_klip": 20,
+      "kredi": {
+        "iade_edilen_klip": 0,
+        "klip_basina_teklif": 5,
+        "puanlanan_toplam": 100,
+        "puanlanan_tutan_cevap_basina": 0.3424657534246575,
+        "puanlanan_yapan_cevap_basina": 4.761904761904762,
+        "toplam": 100,
+        "tutan_cevap_basina": 0.3424657534246575,
+        "yapan_cevap_basina": 4.761904761904762
+      },
+      "model": "seedance_2_0_mini",
+      "olculemeyen_klip": 0,
+      "ortak_tuttu": {
+        "pay": 264,
+        "payda": 275,
+        "yuzde": 96.0
+      },
+      "toplam_klip": 20,
+      "tumu_hakem_yok_klip": 0,
+      "tur": {
+        "grup": {
+          "pay": 28,
+          "payda": 28,
+          "yuzde": 100.0
+        },
+        "ortak": {
+          "pay": 212,
+          "payda": 219,
+          "yuzde": 96.80365296803653
+        },
+        "ozel": {
+          "pay": 55,
+          "payda": 60,
+          "yuzde": 91.66666666666666
+        }
+      },
+      "tuttu": {
+        "pay": 292,
+        "payda": 304,
+        "yuzde": 96.05263157894737
+      },
+      "uretti": 20,
+      "yapti": {
+        "pay": 21,
+        "payda": 22,
+        "yuzde": 95.45454545454545
+      }
+    },
+    {
+      "ad": "Grok Video 1.5 Lite",
+      "gecersiz": 12,
+      "gorunmuyor": 0,
+      "hakem_yok": 48,
+      "hakemin_puanladigi_klip": 18,
+      "kredi": {
+        "iade_edilen_klip": 0,
+        "klip_basina_teklif": 5,
+        "puanlanan_toplam": 90,
+        "puanlanan_tutan_cevap_basina": 0.3629032258064516,
+        "puanlanan_yapan_cevap_basina": 5.0,
+        "toplam": 100,
+        "tutan_cevap_basina": 0.4032258064516129,
+        "yapan_cevap_basina": 5.555555555555555
+      },
+      "model": "grok_video_v15_lite",
+      "olculemeyen_klip": 2,
+      "ortak_tuttu": {
+        "pay": 225,
+        "payda": 239,
+        "yuzde": 94.14225941422593
+      },
+      "toplam_klip": 20,
+      "tumu_hakem_yok_klip": 2,
+      "tur": {
+        "grup": {
+          "pay": 16,
+          "payda": 17,
+          "yuzde": 94.11764705882352
+        },
+        "ortak": {
+          "pay": 187,
+          "payda": 196,
+          "yuzde": 95.40816326530613
+        },
+        "ozel": {
+          "pay": 48,
+          "payda": 53,
+          "yuzde": 90.56603773584906
+        }
+      },
+      "tuttu": {
+        "pay": 248,
+        "payda": 263,
+        "yuzde": 94.29657794676805
+      },
+      "uretti": 20,
+      "yapti": {
+        "pay": 18,
+        "payda": 20,
+        "yuzde": 90.0
+      }
+    },
+    {
+      "ad": "Gemini Omni Flash 1.2",
+      "gecersiz": 3,
+      "gorunmuyor": 5,
+      "hakem_yok": 7,
+      "hakemin_puanladigi_klip": 18,
+      "kredi": {
+        "iade_edilen_klip": 2,
+        "klip_basina_teklif": 11.25,
+        "puanlanan_toplam": 202.5,
+        "puanlanan_tutan_cevap_basina": 0.81,
+        "puanlanan_yapan_cevap_basina": 10.657894736842104,
+        "toplam": 202.5,
+        "tutan_cevap_basina": 0.81,
+        "yapan_cevap_basina": 10.657894736842104
+      },
+      "model": "gemini_omni_flash_1_2",
+      "olculemeyen_klip": 0,
+      "ortak_tuttu": {
+        "pay": 250,
+        "payda": 275,
+        "yuzde": 90.9090909090909
+      },
+      "toplam_klip": 20,
+      "tumu_hakem_yok_klip": 0,
+      "tur": {
+        "grup": {
+          "pay": 24,
+          "payda": 27,
+          "yuzde": 88.88888888888889
+        },
+        "ortak": {
+          "pay": 182,
+          "payda": 197,
+          "yuzde": 92.38578680203045
+        },
+        "ozel": {
+          "pay": 46,
+          "payda": 54,
+          "yuzde": 85.18518518518519
+        }
+      },
+      "tuttu": {
+        "pay": 250,
+        "payda": 275,
+        "yuzde": 90.9090909090909
+      },
+      "uretti": 18,
+      "yapti": {
+        "pay": 19,
+        "payda": 22,
+        "yuzde": 86.36363636363636
+      }
+    }
+  ],
+  "ortak_komutlar": {
+    "komutlar": [
+      1,
+      3,
+      4,
+      5,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "sayi": 18,
+    "tum_modellerde_hakem_cevabi_olan_komut_sayisi": 15
+  },
+  "uyum": {
+    "ana": {
+      "birim": 343,
+      "dislanan_puansiz": 2,
+      "esik_gecti": false,
+      "karisiklik": {
+        "evet": {
+          "evet": 32,
+          "gorunmuyor": 0,
+          "hakem_yok": 9,
+          "hayir": 7
+        },
+        "gorunmuyor": {
+          "evet": 2,
+          "gorunmuyor": 3,
+          "hakem_yok": 1,
+          "hayir": 2
+        },
+        "hayir": {
+          "evet": 18,
+          "gorunmuyor": 0,
+          "hakem_yok": 29,
+          "hayir": 240
+        }
+      },
+      "net_birim": 297,
+      "net_uyum": 0.9158249158249159,
+      "uyum": 0.8017492711370262,
+      "uyusan": 275
+    },
+    "gorunmuyor_hakem_yok_cift": 1,
+    "klip_sayisi": 20,
+    "tumu_hakem_yok_klipler": [
+      "K073",
+      "K091"
+    ],
+    "yan_sayilar": {
+      "hakem_yok_birimler_cikarilinca": {
+        "birim": 304,
+        "cikarilan_birim": 39,
+        "uyum": 0.9046052631578947,
+        "uyusan": 275
+      },
+      "tumu_hakem_yok_klipler_cikarilinca": {
+        "birim": 305,
+        "cikarilan_klip": 2,
+        "uyum": 0.9016393442622951,
+        "uyusan": 275
+      }
+    }
+  }
+}

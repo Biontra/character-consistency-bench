@@ -49,4 +49,20 @@ The rules for running the judge were written in `PROTOCOL.md` before the judge r
 
 ## Results
 
-The videos are generated: 100 attempts, 98 clips, 2 safety refusals. The judge has run: 95 clips have judge answers, 3 clips have none. The human scoring of 20 clips is not done yet, so no results table is published.
+Full tables, counts and charts are in [`results/RESULTS.md`](results/RESULTS.md) (in Turkish). Read the two columns separately; they are not added up.
+
+| Model | Generated | Did the command | Kept the character |
+|---|---|---|---|
+| Kling 3.0 | 20/20 | 100.0% (21/21) | 84.1% (254/302) |
+| Wan 3.0 | 20/20 | 90.9% (20/22) | 92.1% (281/305) |
+| Seedance 2.0 Mini | 20/20 | 95.5% (21/22) | 96.1% (292/304) |
+| Grok Video 1.5 Lite | 20/20 | 90.0% (18/20) | 94.3% (248/263) |
+| Gemini Omni Flash 1.2 | 18/20 | 86.4% (19/22) | 90.9% (250/275) |
+
+![Did the command and kept the character, with cost per kept-character answer](results/grafik_dogruluk_maliyet.svg)
+
+**The human check did not pass.** I scored 20 clips by hand without seeing the judge's answers. Human and judge agreed on 80.2% of answers (275/343); the threshold written in advance was 85%. So this table is one judge's reading that matches a human 80.2% of the time, not a settled ranking.
+
+Most of the gap comes from 39 answers the judge never gave in these 20 clips (2 of the 20 got no judge answers at all); each of those counts as a disagreement. Where the judge did answer, agreement is 90.5% (275/304). That second number was not the one I committed to, so it does not replace the first.
+
+Other things to keep in mind: there is one try per command, so small differences between models were not tested for significance, and the denominators differ between models because of missing judge answers.

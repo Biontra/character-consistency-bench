@@ -1,0 +1,51 @@
+{
+  "ana": {
+    "uyum": 0.8017492711370262,
+    "uyusan": 275,
+    "birim": 343,
+    "dislanan_puansiz": 2,
+    "net_uyum": 0.9158249158249159,
+    "net_birim": 297,
+    "karisiklik": {
+      "evet": {
+        "evet": 32,
+        "hayir": 7,
+        "gorunmuyor": 0,
+        "hakem_yok": 9
+      },
+      "hayir": {
+        "evet": 18,
+        "hayir": 240,
+        "gorunmuyor": 0,
+        "hakem_yok": 29
+      },
+      "gorunmuyor": {
+        "evet": 2,
+        "hayir": 2,
+        "gorunmuyor": 3,
+        "hakem_yok": 1
+      }
+    },
+    "esik_gecti": false
+  },
+  "yan_sayilar": {
+    "tumu_hakem_yok_klipler_cikarilinca": {
+      "uyum": 0.9016393442622951,
+      "uyusan": 275,
+      "birim": 305,
+      "cikarilan_klip": 2
+    },
+    "hakem_yok_birimler_cikarilinca": {
+      "uyum": 0.9046052631578947,
+      "uyusan": 275,
+      "birim": 304,
+      "cikarilan_birim": 39
+    }
+  },
+  "gorunmuyor_hakem_yok_cift": 1,
+  "tumu_hakem_yok_klipler": [
+    "K073",
+    "K091"
+  ],
+  "klip_sayisi": 20
+}
