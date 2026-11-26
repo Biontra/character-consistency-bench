@@ -1,0 +1,11 @@
+TUTAR hakem teknik talimatı, sürüm 1
+
+Önce {metin_dosyasi} dosyasını oku. Orada komut, sorular ve cevap biçimi var.
+
+Sonra {kare_klasoru}/tam/ klasöründeki 001.png'den 050.png'ye 50 karenin hepsini sırayla oku (bir mesajda en çok 10 kare).
+
+İstersen {kare_klasoru}/ust/ ve {kare_klasoru}/alt/ kırpmalarına da bak. Bu zorunlu değil.
+
+Başka hiçbir dosyayı okuma, klasör dışına çıkma, web'e bakma, komut çalıştırma.
+
+Cevabını metin dosyasındaki JSON biçiminde ver ve yalnız JSON'u {cikti_dosyasi} yoluna yaz. Son mesajın tek satır olsun: kaç soru cevapladığın.

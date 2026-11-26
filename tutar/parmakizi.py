@@ -7,6 +7,7 @@ KOK = Path(__file__).resolve().parent.parent
 DOSYALAR = {
     "checks.json": KOK / "secret" / "checks.json",
     "aikyo-baslangic.webp": KOK / "secret" / "aikyo-baslangic.webp",
+    "hakem_talimati_v1.txt": KOK / "judge" / "hakem_talimati_v1.txt",
 }
 CIKTI = KOK / "data" / "fingerprints.json"
 
