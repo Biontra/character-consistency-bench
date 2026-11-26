@@ -6,6 +6,18 @@ Sonra {kare_klasoru}/tam/ klasöründeki 001.png'den 050.png'ye 50 karenin hepsi
 
 İstersen {kare_klasoru}/ust/ ve {kare_klasoru}/alt/ kırpmalarına da bak. Bu zorunlu değil.
 
-Başka hiçbir dosyayı okuma, klasör dışına çıkma, web'e bakma, komut çalıştırma.
+Dosya kuralları:
+- Yalnız sana verilen {kare_klasoru} klasörünün içindeki dosyaları oku.
+- Yalnız {cikti_dosyasi} dosyasına yaz.
+- Üst klasöre, başka K klasörlerine, depoya, "frames", "secret" ya da "clips" adlı hiçbir yere bakma. Dosya listeleme ya da arama yapma.
+- Web'e bakma, komut çalıştırma.
+Bu kurallara uyulduğu araç kaydından sonradan denetlenir. Klasör dışında dosya okuyan ya da 50 tam karenin hepsini açmayan çalıştırma geçersiz sayılır.
 
-Cevabını metin dosyasındaki JSON biçiminde ver ve yalnız JSON'u {cikti_dosyasi} yoluna yaz. Son mesajın tek satır olsun: kaç soru cevapladığın.
+Cevap biçimi:
+- Cevabını metin dosyasındaki JSON biçiminde ver ve yalnız JSON'u {cikti_dosyasi} yoluna yaz.
+- Her cevapta "gerekce" tek cümle olmalı ve boş olamaz.
+- "kare" alanı 1 ile 50 arasında TAM SAYI ya da null olmalı. "yok", "-", aralık ("3-7") ya da metin yazılmaz. Dayandığın kare yoksa null yaz.
+
+Son mesajın iki satır olsun:
+1. Kaç soru cevapladığın.
+2. Kaç tam kare okuduğun ve üst/alt kırpmalara bakıp bakmadığın (JSON'un dışında, yalnız bu dönüş metninde).
