@@ -370,3 +370,14 @@ Sınırlar (kodla çözülmedi, sonuç okunurken bilinmeli):
 ## Kapalı veri seti yayını (26 Kasım 2026)
 
 Gizli dosyalar Hugging Face'e yüklendi: `Biontra/character-consistency-bench` (dataset). Erişim kapalı, elle onaylı (gated: manual); lisans yalnız değerlendirme (veri setindeki `LICENSE.md`). İçerik: 98 klip, sorular ve cevap anahtarı, başlangıç resmi, eşleme, üretim kaydı, hakem ham cevapları, insan cevapları, sonuçlar; 135 dosya. Kareler yüklenmedi (videolardan kodla yeniden çıkarılır). Yüklemeden sonra giriş yapmadan denendi: sayfa ve README açılıyor, denenen 8 gizli dosyanın hepsi 401 döndü. Erişim isteme formu ikinci bir hesapla denenmedi (doğrulanmadı). Lisans metnine bir hukukçu bakmadı.
+
+## Yerel model yan denemesi (27 Kasım 2026)
+
+Bu bölüm sonuçlar yayınlandıktan sonra eklendi; benchmark puanını değiştirmez.
+
+1. Altı açık kaynak görme modeli (llava:7b, qwen2.5vl:3b, granite3.2-vision, gemma3:4b, moondream, llava-phi3) Ollama ile dizüstü bilgisayarda (Apple M4, 16 GB RAM) çalıştırıldı ve 10 kontrol sorusunu cevapladı.
+2. Sorular kodla seçildi (`results/local_models/yerel_dene.py`, tohum 6): insanın ve hakemin evet ya da hayır dediği sorulardan 5 "evet", 5 "hayır". Doğru cevap insan puanıdır.
+3. Her modele klip başına 3 kare (baş, orta, son) tek resim olarak verildi; soru Türkçe, tek deneme, sıcaklık 0.
+4. Puan kuralı ölçümden önce yazıldı (yalnız evet / hayir / gorunmuyor sayılır). İngilizce "yes" / "no" kabul eden ikinci sütun çıktılar görüldükten sonra eklendi ve öyle etiketlendi.
+5. Sonuç: hiçbir yerel model yazı turayı geçmedi (en iyi 5/10); Claude hakem aynı sorularda 8/10. Koşullar eşit değil (hakem 50 kare gördü) ve 10 soru küçük bir örnek.
+6. Soru metni, soru başına cevaplar ve modellerin ham çıktıları açık depoya konmadı.
