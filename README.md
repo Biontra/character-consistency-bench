@@ -2,6 +2,27 @@
 
 TUTAR is a small benchmark that measures whether video models can keep a character intact while making that character do something.
 
+## Links
+
+| What | Where |
+|---|---|
+| Results page (mini leaderboard) | https://biontra.github.io/character-bench.html |
+| Dataset (gated, manual approval) | https://huggingface.co/datasets/Biontra/character-consistency-bench |
+| Full results and charts | [`results/RESULTS.md`](results/RESULTS.md) |
+| Rules written before the runs | [`PROTOCOL.md`](PROTOCOL.md) |
+| The 20 commands | [`data/commands.json`](data/commands.json) |
+| Local model side test | [`results/local_models/README.md`](results/local_models/README.md) |
+| My questions for the shared NEXA benchmark | https://github.com/nexa-lab-ai/nexa-bench/pull/3 |
+| Portfolio | https://biontra.github.io |
+
+## Built with
+
+- Python 3, standard library only (no packages to install)
+- ffmpeg, to cut each video into frames
+- Claude Sonnet as the judge model
+- Higgsfield, to generate the videos with the five models
+- Ollama, for the local model side test
+
 ## What it measures
 
 It asks two questions and scores them separately:
@@ -17,6 +38,20 @@ Input: one start image and 20 commands. The commands were written in Turkish; th
 - Audio (the judge only looks at frames; for the two models where audio could not be turned off, it was removed afterwards)
 - Speed
 - Price
+
+## The questions
+
+103 yes/no questions, 101 of them scored.
+
+| Type | Count | What it checks |
+|---|---|---|
+| Common | 11 | Asked for every clip: is the character still the same? |
+| Group | 7 | Asked for a group of similar commands |
+| Specific | 64 | Asked for one command only |
+| Did the command | 19 | Did the action in the command happen? |
+| Information | 2 | Not scored |
+
+Who wrote them: 77 by hand, 19 by AI, 3 by AI and approved by me, 4 are unconfirmed AI readings. The expected answer is "no" for 60 questions and "yes" for 41, so a judge that always says the same thing cannot score well.
 
 ## How it is scored
 
@@ -70,3 +105,41 @@ Other things to keep in mind: there is one try per command, so small differences
 ## Side test: local open-source models as the judge
 
 Six open-source vision models (llava:7b, qwen2.5vl:3b, granite3.2-vision, gemma3:4b, moondream, llava-phi3) answered 10 of the check questions on a laptop. None beat chance (best 5/10; the Claude judge got 8/10 on the same questions). Details and limits: [`results/local_models/README.md`](results/local_models/README.md).
+
+## How to run
+
+Nothing to install. You need Python 3.
+
+```bash
+git clone https://github.com/Biontra/character-consistency-bench.git
+cd character-consistency-bench
+python3 -m unittest discover -s tests
+```
+
+This runs 312 tests. They check the scoring code, the result tables and that no private file or question text is in the repo.
+
+To rebuild the result tables and charts you need the private question file from the gated dataset, saved as `secret/checks.json`:
+
+```bash
+python3 scripts/sonuc_uret.py --checks secret/checks.json --hakem-ham results/judge_raw.jsonl --uretim-kaydi uretim_kaydi --modeller data/models.json --cikti-dizin results --uyum-raporu results/uyum_raporu.json
+```
+
+Cutting videos into frames (`tutar/kareler.py`) expects ffmpeg at `/opt/homebrew/bin/ffmpeg` (macOS with Homebrew).
+
+## What is in the repo
+
+| Folder | Content |
+|---|---|
+| `tutar/` | Scoring, frame extraction, human-judge agreement |
+| `scripts/` | Command-line steps: prepare the judge input, save answers, build results |
+| `tests/` | 312 tests |
+| `data/` | The 20 commands, the model settings, fingerprints of the private files |
+| `judge/` | The judge prompt, frozen before the judge ran |
+| `results/` | Tables, charts, raw judge answers (question IDs only) |
+| `uretim_kaydi/` | Generation log for each model and the credits spent |
+
+File names and `PROTOCOL.md` are in Turkish because I wrote the rules in my own language first; this README is the English entry point.
+
+## License
+
+Code and public results: MIT, see [`LICENSE`](LICENSE). The gated dataset has its own terms (evaluation only).
