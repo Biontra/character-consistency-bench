@@ -30,3 +30,11 @@ Hardware: MacBook, Apple M4, 16 GB RAM. Ollama 0.32.15. Cost: 0 (no network, no 
 - The judge's time and per-question cost were not recorded when the benchmark ran.
 
 Question text, per-question answers and raw model outputs are not in this folder; the raw outputs can echo parts of the private questions. The scripts read the private files from `secret/`, which is not in this repo.
+
+## Terminal screenshot
+
+![llava:7b answering the 10 questions in the terminal](terminal-llava-7b.png)
+
+## Where a local model is enough, and where it is not (written by Kaan, in Turkish)
+
+Yerel model internetsiz ortamlarda veya şirketlerde gizlilik için yeter. Benim benchmark'ımda hakem olamaz: 10 sorudan 5'ini bildi ve hepsine "hayır" dedi, muhtemelen göremedi bile. Yettiği yerde bile çok iş yapmaz, anca büyük modellerin yükünü çok az hafifletir.
