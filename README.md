@@ -53,6 +53,25 @@ Input: one start image and 20 commands. The commands were written in Turkish; th
 
 Who wrote them: 77 by hand, 19 by AI, 3 by AI and approved by me, 4 are unconfirmed AI readings. The expected answer is "no" for 60 questions and "yes" for 41, so a judge that always says the same thing cannot score well.
 
+## Example
+
+A real command from the benchmark (all 20 are in [`data/commands.json`](data/commands.json)):
+
+> She takes the plush toy and hugs it.
+
+The model gets the start image and this sentence, and returns a 5 second video. The judge then answers a list of yes/no questions about that video.
+
+The real questions are private, so here is the format with an **invented** scene that is not in the benchmark. Command: "He pours tea into the cup."
+
+| Question | Type | Expected | What a wrong answer means |
+|---|---|---|---|
+| Does tea end up in the cup? | Did the command | yes | The action did not happen |
+| Does the teapot have one spout in every frame? | Kept | yes | The object changed shape |
+| Does the cup change colour during the clip? | Kept | no | The scene was not kept |
+| Does his hand pass through the table? | Kept | no | Bodies and objects merged |
+
+Each answer is one of: yes, no, not visible, no judge answer. A question counts as correct when the judge's answer matches the expected one. "Did the command" and "kept" are added up separately.
+
 ## How it is scored
 
 - The judge is Claude. Code extracts 10 frames per second from each video, plus a top-half and bottom-half crop of every frame, and the judge answers by looking at these frames.
@@ -94,7 +113,11 @@ Full tables, counts and charts are in [`results/RESULTS.md`](results/RESULTS.md)
 | Grok Video 1.5 Lite | 20/20 | 90.0% (18/20) | 94.3% (248/263) |
 | Gemini Omni Flash 1.2 | 18/20 | 86.4% (19/22) | 90.9% (250/275) |
 
-![Did the command and kept the character, with cost per kept-character answer](results/grafik_dogruluk_maliyet.svg)
+![Dot plot: Kling did every command but kept the character least](results/chart_did_kept.svg)
+
+![Bar chart: credits per correct kept-the-character answer, Seedance lowest](results/chart_cost.svg)
+
+![Bar: human and judge agreement 80.2%, threshold 85%](results/chart_agreement.svg)
 
 **The human check did not pass.** I scored 20 clips by hand without seeing the judge's answers. Human and judge agreed on 80.2% of answers (275/343); the threshold written in advance was 85%. So this table is one judge's reading that matches a human 80.2% of the time, not a settled ranking.
 
@@ -106,6 +129,8 @@ Other things to keep in mind: there is one try per command, so small differences
 
 Six open-source vision models (llava:7b, qwen2.5vl:3b, granite3.2-vision, gemma3:4b, moondream, llava-phi3) answered 10 of the check questions on a laptop. None beat chance (best 5/10; the Claude judge got 8/10 on the same questions). Details and limits: [`results/local_models/README.md`](results/local_models/README.md).
 
+![Bar chart: correct answers out of 10 for the cloud judge and six local models](results/chart_local_judges.svg)
+
 ## How to run
 
 Nothing to install. You need Python 3.
@@ -116,7 +141,7 @@ cd character-consistency-bench
 python3 -m unittest discover -s tests
 ```
 
-This runs 312 tests. They check the scoring code, the result tables and that no private file or question text is in the repo.
+This runs 317 tests. They check the scoring code, the result tables and that no private file or question text is in the repo.
 
 To rebuild the result tables and charts you need the private question file from the gated dataset, saved as `secret/checks.json`:
 
@@ -131,8 +156,8 @@ Cutting videos into frames (`tutar/kareler.py`) expects ffmpeg at `/opt/homebrew
 | Folder | Content |
 |---|---|
 | `tutar/` | Scoring, frame extraction, human-judge agreement |
-| `scripts/` | Command-line steps: prepare the judge input, save answers, build results |
-| `tests/` | 312 tests |
+| `scripts/` | Command-line steps: prepare the judge input, save answers, build results and charts |
+| `tests/` | 317 tests |
 | `data/` | The 20 commands, the model settings, fingerprints of the private files |
 | `judge/` | The judge prompt, frozen before the judge ran |
 | `results/` | Tables, charts, raw judge answers (question IDs only) |
