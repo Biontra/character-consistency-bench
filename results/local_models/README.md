@@ -6,7 +6,7 @@ Hardware: MacBook, Apple M4, 16 GB RAM. Ollama 0.32.15. Cost: 0 (no network, no 
 
 | Model | Correct (strict) | Correct (lenient) | Answers given | s/question | Size (GB) |
 |---|---|---|---|---|---|
-| llava:7b | 5/10 | 5/10 | no 10 | 9.3 | 4.7 |
+| llava:7b | 5/10 | 5/10 | no 10 | 4.9 | 4.7 |
 | qwen2.5vl:3b | 5/10 | 5/10 | yes 6, no 3, not visible 1 | 10.9 | 3.2 |
 | granite3.2-vision | 0/10 | 4/10 | yes 1, no 8, not visible 1 | 37.4 | 2.4 |
 | gemma3:4b | 3/10 | 3/10 | yes 7, not visible 3 | 7.3 | 3.4 |
@@ -26,7 +26,7 @@ Hardware: MacBook, Apple M4, 16 GB RAM. Ollama 0.32.15. Cost: 0 (no network, no 
 - No local model beat chance. Half of the questions have "yes" as the correct answer, so a model that always gives the same answer gets 5/10. llava:7b answered "no" ten times.
 - The comparison is not equal: the Claude judge saw 50 frames per clip plus top and bottom crops; the local models saw 3 frames in one image.
 - Ten questions is a very small sample. This is a trial, not a ranking of these models.
-- s/question leaves out the first question (model loading) and answers served from cache (under 2 s). The llava:7b time is wall-clock from a separate run; the others come from Ollama's own duration field.
+- s/question leaves out the first question (model loading) and answers served from cache (under 2 s). All times come from Ollama's own duration field. Three earlier llava:7b runs the night before, timed by wall clock on a busy machine, took 9 to 13 s per question; the reason for the gap was not pinned down.
 - The judge's time and per-question cost were not recorded when the benchmark ran.
 
 Question text, per-question answers and raw model outputs are not in this folder; the raw outputs can echo parts of the private questions. The scripts read the private files from `secret/`, which is not in this repo.

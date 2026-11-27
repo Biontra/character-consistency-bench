@@ -5,6 +5,7 @@ Ekrana soru METNI yazilmaz, yalniz soru kimligi yazilir (sorular gizli).
 Kullanim: python3 yerel_dene.py [model]   (varsayilan: llava:7b)
 """
 import base64
+import os
 import io
 import json
 import random
@@ -74,7 +75,7 @@ def sor(resim, soru_metni):
     govde = json.dumps({"model": MODEL, "prompt": istem, "images": [resim],
                         "stream": False,
                         "options": {"temperature": 0, "num_predict": 8, "seed": 6}}).encode()
-    istek = urllib.request.Request("http://127.0.0.1:11434/api/generate", govde,
+    istek = urllib.request.Request(os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434") + "/api/generate", govde,
                                    {"Content-Type": "application/json"})
     # Sure Ollama'nin kendi kaydindan alinir (Mac uyursa duvar saati bozuluyor).
     yanit = json.load(urllib.request.urlopen(istek, timeout=900))
